@@ -5,29 +5,24 @@ App Engine datastore models
 
 """
 
-from google.appengine.ext import ndb
+from mongoengine import Document
+from mongoengine.fields import *
 import logging
+import datetime
 
-class Point(ndb.Model):
-    title = ndb.StringProperty()
-    desc = ndb.StringProperty()
-    latitude = ndb.FloatProperty()
-    longitude = ndb.FloatProperty()
-    resource = ndb.StringProperty()
-    type = ndb.StringProperty(required=True)
-    timestamp = ndb.DateTimeProperty(required=True)
-    pointid = ndb.IntegerProperty()
-    hide = ndb.BooleanProperty(default=False)
-    thumb = ndb.StringProperty()
-    photo = ndb.StringProperty()
-    video = ndb.StringProperty()
-
-    @classmethod
-    def delete_all(cls, delete_type):
-        ndb.delete_multi(
-            cls.query(cls.type == delete_type).fetch(keys_only=True)
-        )
-        return True
+class Point(Document):
+    title = StringField()
+    desc = StringField()
+    latitude = FloatField()
+    longitude = FloatField()
+    resource = StringField()
+    type = StringField(required=True)
+    timestamp = DateTimeField(required=True)
+    pointid = IntField()
+    hide = BooleanField(default=False)
+    thumb = StringField()
+    photo = StringField()
+    video = StringField()
 
     def to_dict(self):
         result = super(Point,self).to_dict()
@@ -40,10 +35,10 @@ class Point(ndb.Model):
         return result
 
 
-class Config(ndb.Model):
-    name = ndb.StringProperty(required=True)
-    value = ndb.StringProperty(required=True)
-    date_added = ndb.DateTimeProperty(auto_now=True)
+class Config(Document):
+    name = StringField(required=True)
+    value = StringField(required=True)
+    date_added = DateTimeField(default=datetime.datetime.now())
 
     def to_dict(self):
         result = super(Config,self).to_dict()
@@ -51,7 +46,7 @@ class Config(ndb.Model):
         return result
 
 
-class User(ndb.Model):
+class User(Document):
     """An admin user capable of viewing reports.
 
     :param str email: email address of user
@@ -59,10 +54,10 @@ class User(ndb.Model):
 
     """
 
-    email = ndb.StringProperty(required=True)
-    password = ndb.StringProperty(required=True)
-    salt = ndb.StringProperty(required=True)
-    authenticated = ndb.BooleanProperty(default=False)
+    email = StringField(required=True)
+    password = StringField(required=True)
+    salt = StringField(required=True)
+    authenticated = BooleanField(default=False)
 
     def is_active(self):
         """True, as all users are active."""

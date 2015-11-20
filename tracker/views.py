@@ -97,7 +97,7 @@ def load_route():
             kml_str+=line
             kml_str+='\n'
 
-    Point.delete_all('route')
+    Point.objects(type='route').delete()
 
     root = parser.fromstring(kml_str)
 
