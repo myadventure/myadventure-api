@@ -18,7 +18,7 @@ def import_photos(username, photoset_title, api_key, api_secret):
             photos = photoset.getPhotos()
             for photo in iter(photos):
                 photo_id = int(photo.id)
-                point = Point.query(Point.pointid == photo_id).get()
+                point = Point.objects(pointid == photo_id).first()
                 if point is None:
                     latitude = None
                     longitude = None

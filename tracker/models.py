@@ -25,8 +25,8 @@ class Point(Document):
     video = StringField()
 
     def to_dict(self):
-        result = super(Point,self).to_dict()
-        result['id'] = self.key.id()
+        result = super(Point,self).to_mongo()
+        result['id'] = self.pk
         timestamp = getattr(self, 'timestamp', None)
         result['timestamp'] = None
         if timestamp:
@@ -54,7 +54,7 @@ class User(Document):
 
     """
 
-    email = StringField(required=True)
+    email = StringField(required=True, primary_key=True)
     password = StringField(required=True)
     salt = StringField(required=True)
     authenticated = BooleanField(default=False)

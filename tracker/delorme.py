@@ -36,7 +36,7 @@ def load_data(url):
                     if text is not None:
                         text = text.encode('utf-8')
             if pointid is not None:
-                point = Point.query(Point.pointid == pointid).get()
+                point = Point.objects(pointid == pointid).first()
             if point is None:
                 title = event
                 coordinates = placemark.Point.coordinates.text.split(',')

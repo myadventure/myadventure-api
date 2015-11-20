@@ -39,7 +39,7 @@ def import_media(access_token, client_secret):
 
         pointid = int(m.hexdigest()[:8], 16)
 
-        point = Point.query(Point.pointid == pointid).get()
+        point = Point.objects(pointid == pointid).first()
 
         if point is None:
 
