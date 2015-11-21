@@ -26,15 +26,15 @@ class Point(Document):
     video = StringField()
 
     def to_dict(self):
-        data = self.to_mongo()
-        data['id'] = str(data['_id'])
-        del data['_id']
+        result = self.to_mongo()
+        result['id'] = str(result['_id'])
+        del result['_id']
         timestamp = getattr(self, 'timestamp', None)
-        data['timestamp'] = None
+        result['timestamp'] = None
         if timestamp:
-            data['timestamp'] = self.timestamp.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            result['timestamp'] = self.timestamp.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-        return data
+        return result
 
 
 class Config(Document):
@@ -43,7 +43,7 @@ class Config(Document):
     date_added = DateTimeField(default=datetime.datetime.now())
 
     def to_dict(self):
-        result = super(Config,self).to_dict()
+        result = self.to_mongo()
         del result['date_added']
         return result
 
