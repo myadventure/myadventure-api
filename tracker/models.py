@@ -44,6 +44,8 @@ class Config(Document):
 
     def to_dict(self):
         result = self.to_mongo()
+        result['id'] = str(result['_id'])
+        del result['_id']
         del result['date_added']
         return result
 
