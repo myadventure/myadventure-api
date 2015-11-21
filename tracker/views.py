@@ -5,7 +5,6 @@ URL route handlers
 """
 
 from flask import request, Response, abort, render_template, session, redirect, url_for, flash
-from flask.ext.login import LoginManager, login_required, logout_user, login_user, current_user
 from werkzeug.exceptions import BadRequest
 from pykml import parser
 from datetime import datetime
@@ -21,47 +20,9 @@ import hashlib, uuid
 import traceback
 
 from models import Point, Config, User
-from forms import LoginForm
-from decorators import nocache
 
 
 def load_routes(app):
-
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-
-    @app.route('/')
-    def root():
-        return app.send_static_file('index.html')
-
-
-    @app.route('/admin/')
-    @login_required
-    @nocache
-    def admin():
-        return app.send_static_file('admin/index.html')
-
-
-    @app.route('/admin/index.html')
-    @login_required
-    @nocache
-    def admin_index():
-        return app.send_static_file('admin/index.html')
-
-
-    @login_manager.user_loader
-    def user_loader(user_id):
-        """Given *user_id*, return the associated User object.
-
-        :param unicode user_id: user_id (email) user to retrieve
-        """
-        return User.objects.get(email=user_id)
-
-
-    @login_manager.unauthorized_handler
-    def unauthorized():
-        return redirect(url_for("login"))
-
 
     @app.errorhandler(400)
     def bad_request(e):
@@ -82,7 +43,6 @@ def load_routes(app):
 
 
     @app.route('/api/v1/point/route/load', methods=['POST'])
-    @login_required
     def load_route():
         try:
             data = json.loads(request.data)
@@ -133,6 +93,7 @@ def load_routes(app):
 
         return list_point('route')
 
+
     @app.route('/api/v1/point/<type>', methods=['GET'])
     def list_point(type):
         points_dict = None
@@ -152,7 +113,6 @@ def load_routes(app):
 
 
     @app.route('/api/v1/point/<type>/<id>', methods=['PUT'])
-    # @login_required
     def update_point(type, id):
         point = Point.objects.get(id=id)
 
@@ -203,7 +163,6 @@ def load_routes(app):
 
 
     @app.route('/api/v1/point/<type>', methods=['POST'])
-    # @login_required
     def add_point(type):
         try:
             data = json.loads(request.data)
@@ -273,7 +232,6 @@ def load_routes(app):
 
 
     @app.route('/api/v1/point/<type>/<id>', methods=['DELETE'])
-    # @login_required
     def delete_point(type, id):
         point = Point.objects.get(id=id)
         try:
@@ -285,21 +243,19 @@ def load_routes(app):
             logging.error(0)
             abort(500)
 
-        return Response(json.dumps({ 'status': 'ok' }), mimetype='application/json');
+        return Response(bson.json_util.dumps({ 'status': 'ok' }), mimetype='application/json');
 
 
     @app.route('/api/v1/config/<name>', methods=['GET'])
-    # @login_required
     def get_config(name):
         config = Config.objects(name=name).order_by('-date_added').first()
         if config is not None:
-            return Response(json.dumps(config.to_dict()), mimetype='application/json');
+            return Response(bson.json_util.dumps(config.to_dict()), mimetype='application/json');
         else:
-            return Response(json.dumps({ 'error': 'configuration was not found.' }), status=400, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'configuration was not found.' }), status=400, mimetype='application/json');
 
 
     @app.route('/api/v1/config', methods=['POST'])
-    # @login_required
     def save_config():
         try:
             data = json.loads(request.data)
@@ -316,29 +272,28 @@ def load_routes(app):
             logging.error(0)
             abort(500)
 
-        return Response(json.dumps(config.to_dict()), mimetype='application/json');
+        return Response(bson.json_util.dumps(config.to_dict()), mimetype='application/json');
 
 
     @app.route('/api/v1/point/tracker/load', methods=['GET'])
     def load_tracker():
         tracker_url = Config.objects(name='tracker_url').order_by('-date_added').first()
         if tracker_url is None:
-            return Response(json.dumps({ 'error': 'tracker_url configuration was not found.' }), status=500, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'tracker_url configuration was not found.' }), status=500, mimetype='application/json');
 
         tracker_type = Config.objects(name='tracker_type').order_by('-date_added').first()
         if tracker_type is None:
-            return Response(json.dumps({ 'error': 'tracker_type configuration was not found.' }), status=500, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'tracker_type configuration was not found.' }), status=500, mimetype='application/json');
 
         if tracker_type.value == 'delorme':
             return delorme.load_data(tracker_url.value)
         elif tracker_type.value == 'spot':
-            return Response(json.dumps({ 'error': 'tracker not supported.' }), status=400, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'tracker not supported.' }), status=400, mimetype='application/json');
         else:
-            return Response(json.dumps({ 'error': 'tracker not supported.' }), status=400, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'tracker not supported.' }), status=400, mimetype='application/json');
 
 
     @app.route('/api/v1/user', methods=['POST'])
-    # @login_required
     def add_user():
         try:
             data = json.loads(request.data)
@@ -358,39 +313,7 @@ def load_routes(app):
             logging.error(0)
             abort(500)
 
-        return Response(json.dumps({ "status": "ok" }), mimetype='application/json');
-
-
-    @app.route("/login", methods=["GET", "POST"])
-    def login():
-        error = None
-        form = LoginForm()
-        if form.validate_on_submit():
-            user = User.objects.get(email=form.email.data)
-            if user:
-                hashed_password = hashlib.sha512(form.password.data + user.salt).hexdigest()
-                if user.password == hashed_password:
-                    user.authenticated = True
-                    user.save()
-                    remember = form.remember.data
-                    login_user(user, remember=remember)
-                    return redirect(url_for("admin"))
-                else:
-                    error = 'Invalid Credentials.'
-            else:
-                error = 'User Not Found.'
-
-        return render_template('login.html', form=form, error=error)
-
-
-    @app.route("/logout", methods=["GET"])
-    # @login_required
-    def logout():
-        user = current_user
-        user.authenticated = False
-        user.save()
-        logout_user()
-        return redirect(url_for("login"))
+        return Response(bson.json_util.dumps({ "status": "ok" }), mimetype='application/json');
 
 
     @app.route('/api/v1/point/flickr/load', methods=['GET'])
@@ -398,22 +321,22 @@ def load_routes(app):
         user_id = Config.objects(name='flickr_username').order_by('-date_added').first()
 
         if user_id is None:
-            return Response(json.dumps({ 'error': 'flickr_username configuration was not found.' }), status=500, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'flickr_username configuration was not found.' }), status=500, mimetype='application/json');
 
         photoset_id = Config.objects(name='flickr_photoset_title').order_by('-date_added').first()
 
         if photoset_id is None:
-            return Response(json.dumps({ 'error': 'flickr_photoset_title configuration was not found.' }), status=500, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'flickr_photoset_title configuration was not found.' }), status=500, mimetype='application/json');
 
         api_key = Config.objects(name='flickr_api_key').order_by('-date_added').first()
 
         if api_key is None:
-            return Response(json.dumps({ 'error': 'flickr_api_key configuration was not found.' }), status=500, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'flickr_api_key configuration was not found.' }), status=500, mimetype='application/json');
 
         api_secret = Config.objects(name='flickr_api_secret').order_by('-date_added').first()
 
         if api_secret is None:
-            return Response(json.dumps({ 'error': 'flickr_api_secret configuration was not found.' }), status=500, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'flickr_api_secret configuration was not found.' }), status=500, mimetype='application/json');
 
         return flickr_import.import_photos(user_id.value, photoset_id.value, api_key.value, api_secret.value)
 
@@ -423,11 +346,11 @@ def load_routes(app):
         access_token = Config.objects(name='instagram_access_token').order_by('-date_added').first()
 
         if access_token is None:
-            return Response(json.dumps({ 'error': 'instagram_access_token configuration was not found.' }), status=500, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'instagram_access_token configuration was not found.' }), status=500, mimetype='application/json');
 
         client_secret = Config.objects(name='instagram_client_secret').order_by('-date_added').first()
 
         if client_secret is None:
-            return Response(json.dumps({ 'error': 'instagram_client_secret configuration was not found.' }), status=500, mimetype='application/json');
+            return Response(bson.json_util.dumps({ 'error': 'instagram_client_secret configuration was not found.' }), status=500, mimetype='application/json');
 
         return instagram_import.import_media(access_token.value, client_secret.value)
