@@ -9,6 +9,7 @@ from mongoengine import Document
 from mongoengine.fields import *
 import logging
 import datetime
+import bson
 
 class Point(Document):
     title = StringField()
@@ -25,14 +26,15 @@ class Point(Document):
     video = StringField()
 
     def to_dict(self):
-        result = super(Point,self).to_mongo()
-        result['id'] = self.pk
+        data = self.to_mongo()
+        data['id'] = str(data['_id'])
+        del data['_id']
         timestamp = getattr(self, 'timestamp', None)
-        result['timestamp'] = None
+        data['timestamp'] = None
         if timestamp:
-            result['timestamp'] = self.timestamp.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            data['timestamp'] = self.timestamp.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-        return result
+        return data
 
 
 class Config(Document):

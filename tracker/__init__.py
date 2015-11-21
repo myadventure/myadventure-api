@@ -17,9 +17,9 @@ def init():
 
     app = Flask(__name__, static_folder=os.getcwd() + '/static', static_url_path='', template_folder=os.getcwd() + '/templates')
 
-    app.secret_key = config.get('Tracker', 'secret_key')
+    app.secret_key = config.get('tracker', 'secret_key')
 
-    mongodb = config.get('Tracker', 'mongodb')
+    mongodb = config.get('tracker', 'mongodb')
 
     connect(
         host=mongodb

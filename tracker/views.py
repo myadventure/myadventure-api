@@ -12,6 +12,7 @@ from datetime import datetime
 import urllib2
 import time
 import json
+import bson
 import logging
 import delorme
 import flickr_import
@@ -54,7 +55,7 @@ def load_routes(app):
 
         :param unicode user_id: user_id (email) user to retrieve
         """
-        return User.objects(email == user_id).first()
+        return User.objects.get(email=user_id)
 
 
     @login_manager.unauthorized_handler
@@ -139,21 +140,21 @@ def load_routes(app):
             points_dict = []
             points = Point.objects(Point.type == type).order_by('timestamp', 'pointid')
             for point in points:
-                points_dict.append(point.to_json())
+                points_dict.append(point.to_dict())
 
-        return Response(points.to_json(), mimetype='application/json');
+        return Response(bson.json_util.dumps(points_dict), mimetype='application/json');
 
 
     @app.route('/api/v1/point/<type>/<id>', methods=['GET'])
     def get_point(type, id):
-        point = Point.objects(id == id).first()
-        return Response(json.dumps(point.to_dict()), mimetype='application/json');
+        point = Point.objects.get(id=id)
+        return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json');
 
 
     @app.route('/api/v1/point/<type>/<id>', methods=['PUT'])
     # @login_required
     def update_point(type, id):
-        point = Point.objects(id == id).first()
+        point = Point.objects.get(id=id)
 
         try:
             data = json.loads(request.data)
@@ -189,14 +190,16 @@ def load_routes(app):
                 point.hide = bool(data['hide'])
 
             point.save()
-        except CapabilityDisabledError:
-            logging.error(u'App Engine Datastore is currently in read-only mode.')
-            abort(500)
+        except TypeError:
+            abort(400)
+        except BadRequest as e:
+            logging.error(e)
+            abort(400)
         except Exception as e:
-            logging.error(0)
+            logging.error(e)
             abort(500)
 
-        return Response(json.dumps(point.to_dict()), mimetype='application/json');
+        return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json');
 
 
     @app.route('/api/v1/point/<type>', methods=['POST'])
@@ -261,20 +264,18 @@ def load_routes(app):
             abort(400)
         except BadRequest as e:
             logging.error(e)
-            # traceback.print_exc()
             abort(400)
         except Exception as e:
             logging.error(e)
-            # traceback.print_exc()
             abort(500)
 
-        return Response(point.to_json(), mimetype='application/json');
+        return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json');
 
 
     @app.route('/api/v1/point/<type>/<id>', methods=['DELETE'])
     # @login_required
     def delete_point(type, id):
-        point = Point.objects(id == id).first()
+        point = Point.objects.get(id=id)
         try:
             point.key.delete()
         except CapabilityDisabledError:
@@ -290,7 +291,7 @@ def load_routes(app):
     @app.route('/api/v1/config/<name>', methods=['GET'])
     # @login_required
     def get_config(name):
-        config = Config.objects(name == name).order_by('-date_added').first()
+        config = Config.objects(name=name).order_by('-date_added').first()
         if config is not None:
             return Response(json.dumps(config.to_dict()), mimetype='application/json');
         else:
@@ -320,11 +321,11 @@ def load_routes(app):
 
     @app.route('/api/v1/point/tracker/load', methods=['GET'])
     def load_tracker():
-        tracker_url = Config.objects(name == 'tracker_url').order_by('-date_added').first()
+        tracker_url = Config.objects(name='tracker_url').order_by('-date_added').first()
         if tracker_url is None:
             return Response(json.dumps({ 'error': 'tracker_url configuration was not found.' }), status=500, mimetype='application/json');
 
-        tracker_type = Config.objects(name == 'tracker_type').order_by('-date_added').first()
+        tracker_type = Config.objects(name='tracker_type').order_by('-date_added').first()
         if tracker_type is None:
             return Response(json.dumps({ 'error': 'tracker_type configuration was not found.' }), status=500, mimetype='application/json');
 
@@ -365,7 +366,7 @@ def load_routes(app):
         error = None
         form = LoginForm()
         if form.validate_on_submit():
-            user = User.objects(email == form.email.data).first()
+            user = User.objects.get(email=form.email.data)
             if user:
                 hashed_password = hashlib.sha512(form.password.data + user.salt).hexdigest()
                 if user.password == hashed_password:
@@ -394,22 +395,22 @@ def load_routes(app):
 
     @app.route('/api/v1/point/flickr/load', methods=['GET'])
     def load_flickr():
-        user_id = Config.objects(name == 'flickr_username').order_by('-date_added').first()
+        user_id = Config.objects(name='flickr_username').order_by('-date_added').first()
 
         if user_id is None:
             return Response(json.dumps({ 'error': 'flickr_username configuration was not found.' }), status=500, mimetype='application/json');
 
-        photoset_id = Config.objects(name == 'flickr_photoset_title').order_by('-date_added').first()
+        photoset_id = Config.objects(name='flickr_photoset_title').order_by('-date_added').first()
 
         if photoset_id is None:
             return Response(json.dumps({ 'error': 'flickr_photoset_title configuration was not found.' }), status=500, mimetype='application/json');
 
-        api_key = Config.objects(name == 'flickr_api_key').order_by('-date_added').first()
+        api_key = Config.objects(name='flickr_api_key').order_by('-date_added').first()
 
         if api_key is None:
             return Response(json.dumps({ 'error': 'flickr_api_key configuration was not found.' }), status=500, mimetype='application/json');
 
-        api_secret = Config.objects(name == 'flickr_api_secret').order_by('-date_added').first()
+        api_secret = Config.objects(name='flickr_api_secret').order_by('-date_added').first()
 
         if api_secret is None:
             return Response(json.dumps({ 'error': 'flickr_api_secret configuration was not found.' }), status=500, mimetype='application/json');
@@ -419,12 +420,12 @@ def load_routes(app):
 
     @app.route('/api/v1/point/instagram/load', methods=['GET'])
     def load_instagram():
-        access_token = Config.objects(name == 'instagram_access_token').order_by('-date_added').first()
+        access_token = Config.objects(name='instagram_access_token').order_by('-date_added').first()
 
         if access_token is None:
             return Response(json.dumps({ 'error': 'instagram_access_token configuration was not found.' }), status=500, mimetype='application/json');
 
-        client_secret = Config.objects(name == 'instagram_client_secret').order_by('-date_added').first()
+        client_secret = Config.objects(name='instagram_client_secret').order_by('-date_added').first()
 
         if client_secret is None:
             return Response(json.dumps({ 'error': 'instagram_client_secret configuration was not found.' }), status=500, mimetype='application/json');
