@@ -82,11 +82,13 @@ def load_routes(app):
                 abort(500)
             try:
                 point.save()
-            except CapabilityDisabledError:
-                logging.error(u'App Engine Datastore is currently in read-only mode.')
-                abort(500)
+            except TypeError:
+                abort(400)
+            except BadRequest as e:
+                logging.error(e)
+                abort(400)
             except Exception as e:
-                logging.error(0)
+                logging.error(e)
                 abort(500)
 
             pointid += 1
@@ -236,11 +238,13 @@ def load_routes(app):
         point = Point.objects.get(id=id)
         try:
             point.key.delete()
-        except CapabilityDisabledError:
-            logging.error(u'App Engine Datastore is currently in read-only mode.')
-            abort(500)
+        except TypeError:
+            abort(400)
+        except BadRequest as e:
+            logging.error(e)
+            abort(400)
         except Exception as e:
-            logging.error(0)
+            logging.error(e)
             abort(500)
 
         return Response(bson.json_util.dumps({ 'status': 'ok' }), mimetype='application/json');

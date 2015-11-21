@@ -27,4 +27,4 @@ def init():
 
     views.load_routes(app)
 
-    app.run()
+    app.run(debug=True)
