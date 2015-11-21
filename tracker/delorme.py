@@ -66,7 +66,7 @@ def load_data(url):
                     pointid=pointid,
                     desc=desc
                 )
-                point.put()
+                point.save()
         except AttributeError:
             pass
         except Exception as e:

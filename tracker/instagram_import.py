@@ -78,7 +78,7 @@ def import_media(access_token, client_secret):
                     resource=resource,
                     desc=desc
                 )
-                point.put()
+                point.save()
             except AttributeError:
                 pass
             except Exception as e:

@@ -59,7 +59,7 @@ def import_photos(username, photoset_title, api_key, api_secret):
                             photo=photo_url,
                             resource=photopage
                         )
-                	    point.put()
+                	    point.save()
                     except AttributeError:
                 	    pass
                     except Exception as e:
