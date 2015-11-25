@@ -2,7 +2,3 @@
 secret_key=<key>
 mongodb=mongodb://<user>:<pass>@<host>:<port>/<name>
 host=<host>
-
-[facebook]
-app_id=<app_id>
-app_secret=<app_secret>

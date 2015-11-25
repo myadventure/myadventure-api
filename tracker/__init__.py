@@ -9,7 +9,6 @@ import os
 import ConfigParser
 from mongoengine import connect
 import views
-import facebook
 
 def init():
 
@@ -20,9 +19,6 @@ def init():
 
     app.secret_key = config.get('tracker', 'secret_key')
 
-    app.facebook_app_id = config.get('facebook', 'app_id')
-    app.facebook_app_secret = config.get('facebook', 'app_secret')
-
     mongodb = config.get('tracker', 'mongodb')
     host = config.get('tracker', 'host')
 
@@ -31,7 +27,5 @@ def init():
     )
 
     views.load_routes(app)
-
-    facebook.load_routes(app)
 
     app.run(debug=True, host=host)
