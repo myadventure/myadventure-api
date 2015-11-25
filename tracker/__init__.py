@@ -9,6 +9,7 @@ import os
 import ConfigParser
 from mongoengine import connect
 import views
+import facebook
 
 def init():
 
@@ -16,6 +17,8 @@ def init():
     config.read(os.getcwd() + '/app.config')
 
     app = Flask(__name__, static_folder=os.getcwd() + '/static', static_url_path='', template_folder=os.getcwd() + '/templates')
+
+    app.debug = True
 
     app.secret_key = config.get('tracker', 'secret_key')
 
@@ -26,5 +29,7 @@ def init():
     )
 
     views.load_routes(app)
+
+    facebook.load_routes(app)
 
     app.run(debug=True)
