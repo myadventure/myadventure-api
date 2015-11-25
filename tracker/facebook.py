@@ -1,8 +1,6 @@
 from flask import Flask, redirect, url_for, request
 from flask_oauthlib.client import OAuth, OAuthException
-
-FACEBOOK_APP_ID = '188477911223606'
-FACEBOOK_APP_SECRET = '621413ddea2bcc5b2e83d42fc40495de'
+import bson
 
 def load_routes(app):
 
@@ -10,8 +8,8 @@ def load_routes(app):
 
     facebook = oauth.remote_app(
         'facebook',
-        consumer_key=FACEBOOK_APP_ID,
-        consumer_secret=FACEBOOK_APP_SECRET,
+        consumer_key=app.facebook_app_id,
+        consumer_secret=app.facebook_app_secret,
         request_token_params={'scope': 'email'},
         base_url='https://graph.facebook.com',
         request_token_url=None,
@@ -34,21 +32,27 @@ def load_routes(app):
     def facebook_authorized():
         resp = facebook.authorized_response()
         if resp is None:
-            return 'Access denied: reason=%s error=%s' % (
-                request.args['error_reason'],
-                request.args['error_description']
-            )
+
+            return bson.json_util.dumps({
+                'error': 'Access denied',
+                'reason': request.args['error_reason'],
+                'description': request.args['error_description']
+            })
+
         if isinstance(resp, OAuthException):
             return 'Access denied: %s' % resp.message
 
-        #TODO: move this crap out of session
-        session['oauth_token'] = (resp['access_token'], '')
         me = facebook.get('/me')
-        return 'Logged in as id=%s name=%s redirect=%s' % \
-            (me.data['id'], me.data['name'], request.args.get('next'))
+
+        return  bson.json_util.dumps({
+            'id': me.data['id'],
+            'name': me.data['name'],
+            'redirect': request.args.get('next'),
+            'access_token': resp['access_token']
+        })
 
 
     @facebook.tokengetter
     def get_facebook_oauth_token():
-        #TODO: move this crap out of session
-        return session.get('oauth_token')
+        token = request.args.get('token', '')
+        return (token, '')

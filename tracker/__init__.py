@@ -18,11 +18,13 @@ def init():
 
     app = Flask(__name__, static_folder=os.getcwd() + '/static', static_url_path='', template_folder=os.getcwd() + '/templates')
 
-    app.debug = True
-
     app.secret_key = config.get('tracker', 'secret_key')
 
+    app.facebook_app_id = config.get('facebook', 'app_id')
+    app.facebook_app_secret = config.get('facebook', 'app_secret')
+
     mongodb = config.get('tracker', 'mongodb')
+    host = config.get('tracker', 'host')
 
     connect(
         host=mongodb
@@ -32,4 +34,4 @@ def init():
 
     facebook.load_routes(app)
 
-    app.run(debug=True)
+    app.run(debug=True, host=host)
