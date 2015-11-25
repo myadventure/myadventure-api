@@ -1,8 +1,8 @@
 import sys
-import tracker
+from app import app
 
 def main(argv):
-    tracker.init()
+    app.run()
     pass
 
 if __name__ == "__main__":

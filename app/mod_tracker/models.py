@@ -1,8 +1,7 @@
 """
 models.py
 
-MongoEngine models
-
+Tracker module MongoEngine models
 """
 
 from mongoengine import Document

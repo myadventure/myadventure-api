@@ -1,4 +1,0 @@
-[tracker]
-secret_key=<key>
-mongodb=mongodb://<user>:<pass>@<host>:<port>/<name>
-host=<host>

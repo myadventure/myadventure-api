@@ -56,5 +56,5 @@ docs/_build/
 # PyBuilder
 target/
 
-# config
-app.config
+# config.py
+config.py
