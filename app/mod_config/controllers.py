@@ -1,8 +1,12 @@
-from flask import Response, Blueprint
+from flask import Response, Blueprint, request, abort
+import logging
+import bson
+import json
+
+from app.mod_config.models import Config
 
 mod_config = Blueprint('config', __name__, url_prefix='/api/v1/config')
 
-from app.mod_config.models import Config
 
 @mod_config.route('/<name>', methods=['GET'])
 def get_config(name):
@@ -10,7 +14,7 @@ def get_config(name):
     if config is not None:
         return Response(bson.json_util.dumps(config.to_dict()), mimetype='application/json')
     else:
-        return Response(bson.json_util.dumps({ 'error': 'configuration was not found.' }), status=400, mimetype='application/json')
+        return Response(bson.json_util.dumps({'error': 'configuration was not found.'}), status=400, mimetype='application/json')
 
 
 @mod_config.route('', methods=['POST'])

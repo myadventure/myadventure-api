@@ -6,9 +6,7 @@ Point module MongoEngine models
 
 from mongoengine import Document
 from mongoengine.fields import *
-import logging
-import datetime
-import bson
+
 
 class Point(Document):
     title = StringField()

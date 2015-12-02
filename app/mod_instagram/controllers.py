@@ -3,6 +3,7 @@ import json
 import hashlib
 import logging
 import urlparse
+import bson
 from instagram.client import InstagramAPI
 
 from app.mod_point.models import Point
@@ -11,6 +12,7 @@ from app.mod_config.models import Config
 api = None
 
 mod_instagram = Blueprint('instagram', __name__, url_prefix='/api/v1/instagram')
+
 
 def get_media(media=None, max_id=None):
 
@@ -33,7 +35,7 @@ def get_media(media=None, max_id=None):
 def import_media(access_token, client_secret):
 
     global api
-    api = InstagramAPI(access_token=access_token.encode('ascii','ignore'), client_secret=client_secret.encode('ascii','ignore'))
+    api = InstagramAPI(access_token=access_token.encode('ascii', 'ignore'), client_secret=client_secret.encode('ascii', 'ignore'))
 
     m = hashlib.md5()
 
@@ -88,7 +90,7 @@ def import_media(access_token, client_secret):
             except Exception as e:
                 logging.error(e.args[0])
 
-    return Response(json.dumps({ 'status': 'ok' }), status=200, mimetype='application/json');
+    return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
 
 
 @mod_instagram.route('/load', methods=['GET'])
@@ -96,11 +98,11 @@ def load_instagram():
     access_token = Config.objects(name='instagram_access_token').order_by('-date_added').first()
 
     if access_token is None:
-        return Response(bson.json_util.dumps({ 'error': 'instagram_access_token configuration was not found.' }), status=500, mimetype='application/json');
+        return Response(bson.json_util.dumps({'error': 'instagram_access_token configuration was not found.'}), status=500, mimetype='application/json')
 
     client_secret = Config.objects(name='instagram_client_secret').order_by('-date_added').first()
 
     if client_secret is None:
-        return Response(bson.json_util.dumps({ 'error': 'instagram_client_secret configuration was not found.' }), status=500, mimetype='application/json');
+        return Response(bson.json_util.dumps({'error': 'instagram_client_secret configuration was not found.'}), status=500, mimetype='application/json')
 
     return import_media(access_token.value, client_secret.value)

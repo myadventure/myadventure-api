@@ -1,8 +1,15 @@
-from flask import Response, Blueprint
+from flask import Blueprint, abort, request, Response
+from werkzeug.exceptions import BadRequest
+from pykml import parser
+import datetime
+import json
+import logging
+import urllib2
 
 from app.mod_point.models import Point
 
 mod_route = Blueprint('route', __name__, url_prefix='/api/v1/route')
+
 
 @mod_route.route('/load', methods=['POST'])
 def load_route():
@@ -18,8 +25,8 @@ def load_route():
     kml_str = ""
     for line in iter(str.splitlines()):
         if not 'atom:link' in line:
-            kml_str+=line
-            kml_str+='\n'
+            kml_str += line
+            kml_str += '\n'
 
     Point.objects(type='route').delete()
 
@@ -30,12 +37,12 @@ def load_route():
         coordinates = placemark.MultiGeometry.Point.coordinates.text.split(',')
         try:
             point = Point(
-                title = placemark.name.text,
-                type = 'route',
-                latitude = float(coordinates[1]),
-                longitude = float(coordinates[0]),
-                pointid = pointid,
-                timestamp = datetime.now()
+                title=placemark.name.text,
+                type='route',
+                latitude=float(coordinates[1]),
+                longitude=float(coordinates[0]),
+                pointid=pointid,
+                timestamp=datetime.now()
             )
         except TypeError:
             abort(500)
@@ -55,4 +62,4 @@ def load_route():
 
         pointid += 1
 
-    return list_point('route')
+    return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')

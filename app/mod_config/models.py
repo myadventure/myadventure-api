@@ -6,9 +6,8 @@ Config module MongoEngine models
 
 from mongoengine import Document
 from mongoengine.fields import *
-import logging
 import datetime
-import bson
+
 
 class Config(Document):
     name = StringField(required=True)

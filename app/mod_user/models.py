@@ -6,9 +6,7 @@ User module MongoEngine models
 
 from mongoengine import Document
 from mongoengine.fields import *
-import logging
-import datetime
-import bson
+
 
 class User(Document):
     """An admin user capable of viewing reports.

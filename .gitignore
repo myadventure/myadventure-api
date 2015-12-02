@@ -58,3 +58,7 @@ target/
 
 # config.py
 config.py
+
+# IntelliJ IDEA
+.idea/
+*.iml

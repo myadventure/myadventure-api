@@ -1,6 +1,7 @@
 import sys
 from app import app
 
+
 def main(argv):
     app.run()
     pass

@@ -4,20 +4,17 @@ controllers.py
 Point module controllers.
 """
 
-from flask import Blueprint, request, Response, abort, render_template, session, redirect, url_for, flash
+from flask import Blueprint, request, Response, abort
 from werkzeug.exceptions import BadRequest
-from pykml import parser
 from datetime import datetime
-import urllib2
-import time
 import json
 import bson
 import logging
-import traceback
 
 from app.mod_point.models import Point
 
 mod_point = Blueprint('point', __name__, url_prefix='/api/v1/point')
+
 
 @mod_point.route('/<type>', methods=['GET'])
 def list_point(type):
