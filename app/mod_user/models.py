@@ -5,21 +5,20 @@ User module MongoEngine models
 """
 
 from mongoengine import Document
-from mongoengine.fields import *
+from mongoengine import fields
 
 
 class User(Document):
-    """An admin user capable of viewing reports.
+    """A platform user.
 
     :param str email: email address of user
-    :param str password: encrypted password for the user
 
     """
 
-    email = StringField(required=True, primary_key=True)
-    password = StringField(required=True)
-    salt = StringField(required=True)
-    authenticated = BooleanField(default=False)
+    email = fields.StringField(required=True, primary_key=True)
+    # password = fields.StringField(required=True)
+    # salt = fields.StringField(required=True)
+    authenticated = fields.BooleanField(default=False)
 
     def is_active(self):
         """True, as all users are active."""

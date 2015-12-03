@@ -155,9 +155,9 @@ def add_point(type):
 
 @mod_point.route('/<type>/<id>', methods=['DELETE'])
 def delete_point(type, id):
-    point = Point.objects.get(id=id)
+    point = Point.objects(id=id)
     try:
-        point.key.delete()
+        point.delete()
     except TypeError:
         abort(400)
     except BadRequest as e:
