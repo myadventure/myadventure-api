@@ -7,6 +7,8 @@ Point module controllers.
 from flask import Blueprint, request, jsonify, render_template, redirect, session
 from datetime import datetime, timedelta
 
+from mongoengine import DoesNotExist
+import logging
 from werkzeug.security import gen_salt
 
 from app.mod_auth.models import Client
@@ -22,19 +24,41 @@ mod_auth = Blueprint('auth', __name__, url_prefix='')
 def current_user():
     if 'id' in session:
         uid = session['id']
-        return User.objects(id=uid).first()
+        try:
+            user = User.objects.get(id=uid)
+            return user
+        except DoesNotExist:
+            logging.info("User not found.")
     return None
+
+
+@mod_auth.route('/', methods=('GET', 'POST'))
+def home():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        user = User.objects.get(username=username)
+        if not user:
+            user = User(username=username)
+            user.save()
+        session['id'] = user.id
+        return redirect('/')
+    user = current_user()
+    return render_template('home.html', user=user)
 
 
 @mod_auth.route('/client')
 def client():
+    user = current_user()
+    if not user:
+        return redirect('/')
     item = Client(
         client_id=gen_salt(40),
         client_secret=gen_salt(50),
         _redirect_uris=' '.join([
             'http://myadventure.dev:8000/authorized'
         ]),
-        _default_scopes='email'
+        _default_scopes='email',
+        user_id=user.id,
     )
     item.save()
     return jsonify(
@@ -56,7 +80,7 @@ def load_grant(client_id, code):
 @oauth.grantsetter
 def save_grant(client_id, code, request, *args, **kwargs):
     # decide the expires time yourself
-    expires = datetime.utcnow() + timedelta(seconds=100)
+    expires = datetime.utcnow() + timedelta(seconds=3600)
     grant = Grant(
         client_id=client_id,
         code=code['code'],
@@ -72,9 +96,16 @@ def save_grant(client_id, code, request, *args, **kwargs):
 @oauth.tokengetter
 def load_token(access_token=None, refresh_token=None):
     if access_token:
-        return Token.objects(access_token=access_token).first()
+        try:
+            return Token.objects.get(access_token=access_token)
+        except DoesNotExist:
+            logging.info("Access token not found.")
     elif refresh_token:
-        return Token.objects(refresh_token=refresh_token).first()
+        try:
+            return Token.objects.get(refresh_token=refresh_token)
+        except DoesNotExist:
+            logging.info("Refresh token not found.")
+    return None
 
 
 @oauth.tokensetter
@@ -98,15 +129,16 @@ def save_token(token, request, *args, **kwargs):
         expires=expires,
         client_id=request.client.client_id,
         user_id=request.user.id,
+        user=request.user
     )
     tok.save()
     return tok
 
 
-# @oauth.usergetter
-# def get_user(username, password, *args, **kwargs):
-#     user = User.objects(email=username).first()
-#     return user
+@mod_auth.route('/oauth/token', methods=['GET', 'POST'])
+@oauth.token_handler
+def access_token():
+    return None
 
 
 @mod_auth.route('/oauth/authorize', methods=['GET', 'POST'])
@@ -117,7 +149,7 @@ def authorize(*args, **kwargs):
         return redirect('/')
     if request.method == 'GET':
         client_id = kwargs.get('client_id')
-        client = Client.objects(client_id=client_id).first()
+        client = Client.objects.get(client_id=client_id)
         kwargs['client'] = client
         kwargs['user'] = user
         return render_template('authorize.html', **kwargs)
@@ -126,22 +158,10 @@ def authorize(*args, **kwargs):
     return confirm == 'yes'
 
 
-@mod_auth.route('/oauth/token', methods=['GET', 'POST'])
-@oauth.token_handler
-def access_token():
-    return None
-
-
-@mod_auth.route('/oauth/revoke', methods=['POST'])
-@oauth.revoke_handler
-def revoke_token():
-    pass
-
-
 @mod_auth.route('/api/me')
+@oauth.require_oauth()
 def me():
-    valid, req = oauth.verify_request(['email'])
-    if valid:
-        print req
-        return jsonify(user=req.user)
-    return jsonify(status='error')
+    user = request.oauth.user
+    return jsonify(username=user.username)
+
+

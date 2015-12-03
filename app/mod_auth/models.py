@@ -21,8 +21,8 @@ class User(Document):
 
 
 class Client(Document):
-    # human readable name, not required
-    name = fields.StringField()
+    user_id = fields.IntField(null=False)
+    user = fields.ReferenceField(User)
 
     client_id = fields.StringField(primary_key=True)
     client_secret = fields.StringField(null=False, unique=True)
@@ -57,6 +57,8 @@ class Client(Document):
 
 
 class Grant(Document):
+    id = fields.SequenceField(primary_key=True)
+
     user_id = fields.IntField(null=False)
     user = fields.ReferenceField(User)
 
@@ -78,6 +80,8 @@ class Grant(Document):
 
 
 class Token(Document):
+    id = fields.SequenceField(primary_key=True)
+
     user_id = fields.IntField(null=False)
     user = fields.ReferenceField(User)
 
