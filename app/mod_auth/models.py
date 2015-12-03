@@ -7,7 +7,17 @@ Auth module MongoEngine models
 from mongoengine import Document
 from mongoengine import fields
 
-from app.mod_user.models import User
+
+class User(Document):
+    """A platform user.
+
+    :param str username: username of user
+    :param str email: email address of user
+
+    """
+    id = fields.SequenceField(primary_key=True)
+    username = fields.StringField(unique=True)
+    email = fields.StringField()
 
 
 class Client(Document):
@@ -47,7 +57,7 @@ class Client(Document):
 
 
 class Grant(Document):
-    user_id = fields.StringField(null=False)
+    user_id = fields.IntField(null=False)
     user = fields.ReferenceField(User)
 
     client_id = fields.StringField(null=False)
@@ -68,7 +78,7 @@ class Grant(Document):
 
 
 class Token(Document):
-    user_id = fields.StringField(null=False)
+    user_id = fields.IntField(null=False)
     user = fields.ReferenceField(User)
 
     client_id = fields.StringField(null=False)

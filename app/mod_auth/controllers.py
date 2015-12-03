@@ -4,20 +4,26 @@ controllers.py
 Point module controllers.
 """
 
-from flask import Blueprint, request, jsonify, render_template, redirect
+from flask import Blueprint, request, jsonify, render_template, redirect, session
 from datetime import datetime, timedelta
 
 from werkzeug.security import gen_salt
 
-from app.mod_user.controllers import current_user
-
 from app.mod_auth.models import Client
 from app.mod_auth.models import Grant
 from app.mod_auth.models import Token
+from app.mod_auth.models import User
 
 from app.mod_auth import oauth
 
 mod_auth = Blueprint('auth', __name__, url_prefix='')
+
+
+def current_user():
+    if 'id' in session:
+        uid = session['id']
+        return User.objects(id=uid).first()
+    return None
 
 
 @mod_auth.route('/client')
@@ -75,7 +81,7 @@ def load_token(access_token=None, refresh_token=None):
 def save_token(token, request, *args, **kwargs):
     toks = Token.objects(
         client_id=request.client.client_id,
-        user_id=request.user.get_id()
+        user_id=request.user.id
     )
     # make sure that every client has only one token connected to a user
     for t in toks:
@@ -91,7 +97,7 @@ def save_token(token, request, *args, **kwargs):
         _scopes=token['scope'],
         expires=expires,
         client_id=request.client.client_id,
-        user_id=request.user.get_id(),
+        user_id=request.user.id,
     )
     tok.save()
     return tok
@@ -133,8 +139,9 @@ def revoke_token():
 
 
 @mod_auth.route('/api/me')
-@oauth.require_oauth('email')
 def me():
-    print request.oauth
-    user = request.oauth.user
-    return jsonify(username=user.email)
+    valid, req = oauth.verify_request(['email'])
+    if valid:
+        print req
+        return jsonify(user=req.user)
+    return jsonify(status='error')

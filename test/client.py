@@ -27,7 +27,8 @@ remote = oauth.remote_app(
 def index():
     if 'remote_oauth' in session:
         resp = remote.get('me')
-        return jsonify(resp.data)
+        if resp.status != 401:
+            return jsonify(resp.data)
     next_url = request.args.get('next') or request.referrer or None
     return remote.authorize(
         callback=url_for('authorized', next=next_url, _external=True)
@@ -42,7 +43,6 @@ def authorized():
             request.args['error_reason'],
             request.args['error_description']
         )
-    print resp
     session['remote_oauth'] = (resp['access_token'], '')
     return jsonify(oauth_token=resp['access_token'])
 
