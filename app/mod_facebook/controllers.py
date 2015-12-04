@@ -60,16 +60,17 @@ def facebook_authorized():
     try:
         me = facebook.get('/me?fields=id,name,email,link')
         user = User.objects.get(facebook_id=me.data.get('id'))
+        session['facebook_id'] = user.facebook_id
     except client.OAuthException:
         return 'Access denied: %s' % resp.message
     except DoesNotExist:
         user = User(
             email=me.data.get('email'),
             name=me.data.get('name'),
-            facebook_id=me.data.get('id')
+            facebook_id=me.data.get('id'),
+            facebook_access_token=resp['access_token']
         )
         user.save()
-    session['id'] = user.id
     client_id = request.args.get('client_id')
     scope = request.args.get('scope')
     redirect_uri = request.args.get('redirect_uri')

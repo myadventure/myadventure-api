@@ -13,7 +13,6 @@ from app.mod_user.controllers import mod_user
 from app.mod_facebook.controllers import mod_facebook
 
 from app.mod_user.models import User
-from app.mod_user.controllers import current_user
 
 from app.mod_auth import oauth
 

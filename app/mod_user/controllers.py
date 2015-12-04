@@ -14,10 +14,10 @@ mod_user = Blueprint('user', __name__, url_prefix='/api/v1/user')
 
 
 def current_user():
-    if 'id' in session:
-        uid = session['id']
+    if 'facebook_id' in session:
+        facebook_id = session['facebook_id']
         try:
-            user = User.objects.get(id=uid)
+            user = User.objects.get(facebook_id=facebook_id)
             return user
         except DoesNotExist:
             pass
