@@ -45,20 +45,6 @@ def internal_error(e):
     """Return a custom 500 error."""
     return 'Sorry, unexpected error: {}'.format(e), 500
 
-
-@app.route('/', methods=('GET', 'POST'))
-def home():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        user = User.objects(username=username).first()
-        if not user:
-            user = User(username=username)
-            user.save()
-        session['id'] = user.id
-        return redirect('/')
-    user = current_user()
-    return render_template('home.html', user=user)
-
 # Registering module blueprints
 app.register_blueprint(mod_point)
 app.register_blueprint(mod_route)

@@ -16,5 +16,6 @@ class User(Document):
 
     """
     id = fields.SequenceField(primary_key=True)
-    username = fields.StringField(unique=True)
-    email = fields.StringField()
+    email = fields.StringField(unique=True)
+    facebook_id = fields.IntField(unique=True)
+    name = fields.StringField()

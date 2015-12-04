@@ -15,16 +15,17 @@ from app.mod_auth.models import Client
 from app.mod_auth.models import Grant
 from app.mod_auth.models import Token
 
-from app.mod_auth import oauth
+from app.mod_facebook.controllers import current_user
 
-from app.mod_user.controllers import current_user
+from app.mod_auth import oauth
 
 mod_auth = Blueprint('auth', __name__, url_prefix='')
 
 
 @mod_auth.route('/client')
+@oauth.require_oauth()
 def client():
-    user = current_user()
+    user = request.oauth.user
     if not user:
         return redirect('/')
     item = Client(
@@ -138,6 +139,6 @@ def authorize(*args, **kwargs):
 @oauth.require_oauth()
 def me():
     user = request.oauth.user
-    return jsonify(username=user.username)
+    return jsonify(email=user.email)
 
 
