@@ -26,7 +26,7 @@ remote = oauth.remote_app(
 @app.route('/')
 def index():
     if 'remote_oauth' in session:
-        resp = remote.get('me')
+        resp = remote.get('/api/v1/user')
         if resp.status != 401:
             return jsonify(resp.data)
     next_url = request.args.get('next') or request.referrer or None
@@ -56,4 +56,4 @@ if __name__ == '__main__':
     import os
     os.environ['DEBUG'] = 'true'
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
-    app.run(host='localhost', port=8000)
+    app.run(host='myadventure.dev', port=8000)

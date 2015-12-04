@@ -3,7 +3,7 @@ from app import app
 
 
 def main(argv):
-    app.run()
+    app.run(host=app.config['HOST'], port=app.config['PORT'])
     pass
 
 if __name__ == "__main__":

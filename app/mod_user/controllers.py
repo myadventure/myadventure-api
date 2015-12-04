@@ -3,13 +3,14 @@ controllers.py
 
 User module controllers.
 """
-from flask import logging, Blueprint
+from flask import Blueprint, request, jsonify, session
 from mongoengine import DoesNotExist
-from flask import session
+
+from app.mod_auth import oauth
 
 from app.mod_user.models import User
 
-mod_user = Blueprint('user', __name__, url_prefix='/user')
+mod_user = Blueprint('user', __name__, url_prefix='/api/v1/user')
 
 
 def current_user():
@@ -19,5 +20,13 @@ def current_user():
             user = User.objects.get(id=uid)
             return user
         except DoesNotExist:
-            logging.info("User not found.")
+            pass
+
     return None
+
+
+@mod_user.route('/')
+@oauth.require_oauth()
+def me():
+    user = request.oauth.user
+    return jsonify(email=user.email)

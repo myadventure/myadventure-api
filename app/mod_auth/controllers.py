@@ -4,7 +4,7 @@ controllers.py
 Point module controllers.
 """
 
-from flask import Blueprint, request, jsonify, render_template, redirect, session
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, abort
 from datetime import datetime, timedelta
 
 from mongoengine import DoesNotExist
@@ -15,7 +15,7 @@ from app.mod_auth.models import Client
 from app.mod_auth.models import Grant
 from app.mod_auth.models import Token
 
-from app.mod_facebook.controllers import current_user
+from app.mod_user.controllers import current_user
 
 from app.mod_auth import oauth
 
@@ -27,7 +27,7 @@ mod_auth = Blueprint('auth', __name__, url_prefix='')
 def client():
     user = request.oauth.user
     if not user:
-        return redirect('/')
+        return abort(400)
     item = Client(
         client_id=gen_salt(40),
         client_secret=gen_salt(50),
@@ -58,12 +58,14 @@ def load_grant(client_id, code):
 def save_grant(client_id, code, request, *args, **kwargs):
     # decide the expires time yourself
     expires = datetime.utcnow() + timedelta(seconds=3600)
+    user = current_user()
     grant = Grant(
         client_id=client_id,
         code=code['code'],
         redirect_uri=request.redirect_uri,
         _scopes=' '.join(request.scopes),
-        user=current_user(),
+        user=user,
+        user_id=user.id,
         expires=expires
     )
     grant.save()
@@ -87,9 +89,10 @@ def load_token(access_token=None, refresh_token=None):
 
 @oauth.tokensetter
 def save_token(token, request, *args, **kwargs):
+    user = request.user
     toks = Token.objects(
         client_id=request.client.client_id,
-        user_id=request.user.id
+        user_id=user.id
     )
     # make sure that every client has only one token connected to a user
     for t in toks:
@@ -105,8 +108,8 @@ def save_token(token, request, *args, **kwargs):
         _scopes=token['scope'],
         expires=expires,
         client_id=request.client.client_id,
-        user_id=request.user.id,
-        user=request.user
+        user_id=user.id,
+        user=user
     )
     tok.save()
     return tok
@@ -123,7 +126,11 @@ def access_token():
 def authorize(*args, **kwargs):
     user = current_user()
     if not user:
-        return redirect('/')
+        client_id = request.args.get('client_id')
+        scope = request.args.get('scope')
+        redirect_uri = request.args.get('redirect_uri')
+        response_type = request.args.get('response_type')
+        return redirect(url_for('facebook.login', client_id=client_id, scope=scope, redirect_uri=redirect_uri, response_type=response_type))
     if request.method == 'GET':
         client_id = kwargs.get('client_id')
         client = Client.objects.get(client_id=client_id)
@@ -134,11 +141,5 @@ def authorize(*args, **kwargs):
     confirm = request.form.get('confirm', 'no')
     return confirm == 'yes'
 
-
-@mod_auth.route('/api/me')
-@oauth.require_oauth()
-def me():
-    user = request.oauth.user
-    return jsonify(email=user.email)
 
 
