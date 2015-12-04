@@ -14,36 +14,12 @@ from werkzeug.security import gen_salt
 from app.mod_auth.models import Client
 from app.mod_auth.models import Grant
 from app.mod_auth.models import Token
-from app.mod_auth.models import User
 
 from app.mod_auth import oauth
 
+from app.mod_user.controllers import current_user
+
 mod_auth = Blueprint('auth', __name__, url_prefix='')
-
-
-def current_user():
-    if 'id' in session:
-        uid = session['id']
-        try:
-            user = User.objects.get(id=uid)
-            return user
-        except DoesNotExist:
-            logging.info("User not found.")
-    return None
-
-
-@mod_auth.route('/', methods=('GET', 'POST'))
-def home():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        user = User.objects.get(username=username)
-        if not user:
-            user = User(username=username)
-            user.save()
-        session['id'] = user.id
-        return redirect('/')
-    user = current_user()
-    return render_template('home.html', user=user)
 
 
 @mod_auth.route('/client')

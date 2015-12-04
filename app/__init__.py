@@ -9,8 +9,12 @@ from app.mod_spot.controllers import mod_spot
 from app.mod_flickr.controllers import mod_flickr
 from app.mod_instagram.controllers import mod_instagram
 from app.mod_auth.controllers import mod_auth
-from app.mod_auth.models import User
-from app.mod_auth.controllers import current_user
+from app.mod_user.controllers import mod_user
+from app.mod_facebook.controllers import mod_facebook
+
+from app.mod_user.models import User
+from app.mod_user.controllers import current_user
+
 from app.mod_auth import oauth
 
 app = Flask(__name__, static_folder=os.getcwd() + '/app/static', static_url_path='', template_folder=os.getcwd() + '/app/templates')
@@ -64,3 +68,5 @@ app.register_blueprint(mod_spot)
 app.register_blueprint(mod_flickr)
 app.register_blueprint(mod_instagram)
 app.register_blueprint(mod_auth)
+app.register_blueprint(mod_user)
+app.register_blueprint(mod_facebook)

@@ -62,3 +62,6 @@ config.py
 # IntelliJ IDEA
 .idea/
 *.iml
+
+# facebook.config
+facebook.config
