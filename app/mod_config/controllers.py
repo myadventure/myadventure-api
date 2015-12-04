@@ -5,10 +5,13 @@ import json
 
 from app.mod_config.models import Config
 
+from app.mod_auth import oauth
+
 mod_config = Blueprint('config', __name__, url_prefix='/api/v1/config')
 
 
 @mod_config.route('/<name>', methods=['GET'])
+@oauth.require_oauth('email')
 def get_config(name):
     config = Config.objects(name=name).order_by('-date_added').first()
     if config is not None:
@@ -18,6 +21,7 @@ def get_config(name):
 
 
 @mod_config.route('', methods=['POST'])
+@oauth.require_oauth('email')
 def save_config():
     try:
         data = json.loads(request.data)

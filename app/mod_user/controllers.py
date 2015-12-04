@@ -26,7 +26,7 @@ def current_user():
 
 
 @mod_user.route('/')
-@oauth.require_oauth()
+@oauth.require_oauth('email')
 def me():
     user = request.oauth.user
     return jsonify(email=user.email)

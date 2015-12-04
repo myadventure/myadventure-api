@@ -13,6 +13,8 @@ import logging
 
 from app.mod_point.models import Point
 
+from app.mod_auth import oauth
+
 mod_point = Blueprint('point', __name__, url_prefix='/api/v1/point')
 
 
@@ -35,6 +37,7 @@ def get_point(type, id):
 
 
 @mod_point.route('/<type>/<id>', methods=['PUT'])
+@oauth.require_oauth('email')
 def update_point(type, id):
     point = Point.objects.get(id=id)
 
@@ -85,6 +88,7 @@ def update_point(type, id):
 
 
 @mod_point.route('/<type>', methods=['POST'])
+@oauth.require_oauth('email')
 def add_point(type):
     try:
         data = json.loads(request.data)
@@ -154,6 +158,7 @@ def add_point(type):
 
 
 @mod_point.route('/<type>/<id>', methods=['DELETE'])
+@oauth.require_oauth('email')
 def delete_point(type, id):
     point = Point.objects(id=id)
     try:

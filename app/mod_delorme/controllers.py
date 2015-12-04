@@ -9,6 +9,8 @@ import bson
 from app.mod_point.models import Point
 from app.mod_config.models import Config
 
+from app.mod_auth import oauth
+
 mod_delorme = Blueprint('delorme', __name__, url_prefix='/api/v1/delorme')
 
 
@@ -81,6 +83,7 @@ def load_data(url):
 
 
 @mod_delorme.route('/load', methods=['GET'])
+@oauth.require_oauth('email')
 def load_tracker():
     tracker_url = Config.objects(name='tracker_url').order_by('-date_added').first()
     if tracker_url is None:
