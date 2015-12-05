@@ -5,14 +5,14 @@ Config module MongoEngine models
 """
 
 from mongoengine import Document
-from mongoengine.fields import *
+from mongoengine import fields
 import datetime
 
 
 class Config(Document):
-    name = StringField(required=True)
-    value = StringField(required=True)
-    date_added = DateTimeField(default=datetime.datetime.now())
+    name = fields.StringField(required=True)
+    value = fields.StringField(required=True)
+    date_added = fields.DateTimeField(default=datetime.datetime.now())
 
     def to_dict(self):
         result = self.to_mongo()

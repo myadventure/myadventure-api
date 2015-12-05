@@ -7,7 +7,6 @@ from flask import Blueprint, request, jsonify, session
 from mongoengine import DoesNotExist
 
 from app.mod_auth import oauth
-
 from app.mod_user.models import User
 
 mod_user = Blueprint('user', __name__, url_prefix='/api/v1/user')

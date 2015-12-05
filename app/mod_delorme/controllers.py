@@ -1,3 +1,8 @@
+"""
+controllers.py
+
+Delorme module controllers.
+"""
 from flask import Response, Blueprint
 import json
 import urllib2

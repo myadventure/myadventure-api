@@ -1,3 +1,8 @@
+"""
+controllers.py
+
+Instagram module controllers.
+"""
 from flask import Response, Blueprint
 import json
 import hashlib
@@ -8,7 +13,6 @@ from instagram.client import InstagramAPI
 
 from app.mod_point.models import Point
 from app.mod_config.models import Config
-
 from app.mod_auth import oauth
 
 api = None

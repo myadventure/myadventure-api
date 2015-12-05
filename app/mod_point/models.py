@@ -5,22 +5,22 @@ Point module MongoEngine models
 """
 
 from mongoengine import Document
-from mongoengine.fields import *
+from mongoengine import fields
 
 
 class Point(Document):
-    title = StringField()
-    desc = StringField()
-    latitude = FloatField()
-    longitude = FloatField()
-    resource = StringField()
-    type = StringField(required=True)
-    timestamp = DateTimeField(required=True)
-    pointid = IntField()
-    hide = BooleanField(default=False)
-    thumb = StringField()
-    photo = StringField()
-    video = StringField()
+    title = fields.StringField()
+    desc = fields.StringField()
+    latitude = fields.FloatField()
+    longitude = fields.FloatField()
+    resource = fields.StringField()
+    type = fields.StringField(required=True)
+    timestamp = fields.DateTimeField(required=True)
+    pointid = fields.IntField()
+    hide = fields.BooleanField(default=False)
+    thumb = fields.StringField()
+    photo = fields.StringField()
+    video = fields.StringField()
 
     def to_dict(self):
         result = self.to_mongo()

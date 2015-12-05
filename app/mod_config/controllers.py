@@ -1,10 +1,14 @@
+"""
+controllers.py
+
+Config module controllers.
+"""
 from flask import Response, Blueprint, request, abort
 import logging
 import bson
 import json
 
 from app.mod_config.models import Config
-
 from app.mod_auth import oauth
 
 mod_config = Blueprint('config', __name__, url_prefix='/api/v1/config')

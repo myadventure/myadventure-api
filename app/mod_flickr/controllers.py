@@ -1,12 +1,17 @@
+"""
+controllers.py
+
+Flickr module controllers.
+"""
 from flask import Response, Blueprint
 import flickr_api
 from datetime import datetime
 import logging
 import json
 import bson
+
 from app.mod_point.models import Point
 from app.mod_config.models import Config
-
 from app.mod_auth import oauth
 
 mod_flickr = Blueprint('flickr', __name__, url_prefix='/api/v1/flickr')

@@ -1,12 +1,11 @@
 """
 controllers.py
 
-Point module controllers.
+Auth module controllers.
 """
 
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, abort
 from datetime import datetime, timedelta
-
 from mongoengine import DoesNotExist
 import logging
 from werkzeug.security import gen_salt
@@ -14,9 +13,7 @@ from werkzeug.security import gen_salt
 from app.mod_auth.models import Client
 from app.mod_auth.models import Grant
 from app.mod_auth.models import Token
-
 from app.mod_user.controllers import current_user
-
 from app.mod_auth import oauth
 
 mod_auth = Blueprint('auth', __name__, url_prefix='')

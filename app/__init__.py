@@ -1,6 +1,11 @@
+"""
+Initialize application
+
+"""
 import os
 from mongoengine import connect
 from flask import Flask
+
 from app.mod_point.controllers import mod_point
 from app.mod_route.controllers import mod_route
 from app.mod_config.controllers import mod_config
@@ -11,9 +16,7 @@ from app.mod_instagram.controllers import mod_instagram
 from app.mod_auth.controllers import mod_auth
 from app.mod_user.controllers import mod_user
 from app.mod_facebook.controllers import mod_facebook
-
 from app.mod_user.models import User
-
 from app.mod_auth import oauth
 
 app = Flask(__name__, static_folder=os.getcwd() + '/app/static', static_url_path='', template_folder=os.getcwd() + '/app/templates')

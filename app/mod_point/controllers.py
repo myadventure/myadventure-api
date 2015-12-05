@@ -12,7 +12,6 @@ import bson
 import logging
 
 from app.mod_point.models import Point
-
 from app.mod_auth import oauth
 
 mod_point = Blueprint('point', __name__, url_prefix='/api/v1/point')
