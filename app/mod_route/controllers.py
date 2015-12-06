@@ -11,6 +11,7 @@ import json
 import logging
 import urllib2
 
+from app.decorators import crossdomain
 from app.mod_point.models import Point
 
 from app.mod_auth import oauth
@@ -19,6 +20,7 @@ mod_route = Blueprint('route', __name__, url_prefix='/api/v1/route')
 
 
 @mod_route.route('/load', methods=['POST'])
+@crossdomain(origin='*')
 @oauth.require_oauth('email')
 def load_route():
     try:

@@ -13,7 +13,7 @@ from werkzeug.security import gen_salt
 from app.mod_auth.models import Client
 from app.mod_auth.models import Grant
 from app.mod_auth.models import Token
-from app.mod_user.controllers import current_user
+from app.mod_user import current_user
 from app.mod_auth import oauth
 
 mod_auth = Blueprint('auth', __name__, url_prefix='')

@@ -8,6 +8,7 @@ import logging
 import bson
 import json
 
+from app.decorators import crossdomain
 from app.mod_config.models import Config
 from app.mod_auth import oauth
 
@@ -15,6 +16,7 @@ mod_config = Blueprint('config', __name__, url_prefix='/api/v1/config')
 
 
 @mod_config.route('/<name>', methods=['GET'])
+@crossdomain(origin='*')
 @oauth.require_oauth('email')
 def get_config(name):
     config = Config.objects(name=name).order_by('-date_added').first()
@@ -25,6 +27,7 @@ def get_config(name):
 
 
 @mod_config.route('', methods=['POST'])
+@crossdomain(origin='*')
 @oauth.require_oauth('email')
 def save_config():
     try:

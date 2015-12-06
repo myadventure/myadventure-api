@@ -13,11 +13,13 @@ import logging
 
 from app.mod_point.models import Point
 from app.mod_auth import oauth
+from app.decorators import crossdomain
 
 mod_point = Blueprint('point', __name__, url_prefix='/api/v1/point')
 
 
 @mod_point.route('/<type>', methods=['GET'])
+@crossdomain(origin='*')
 def list_point(type):
     points_dict = None
     if points_dict is None:
@@ -30,12 +32,14 @@ def list_point(type):
 
 
 @mod_point.route('/<type>/<id>', methods=['GET'])
+@crossdomain(origin='*')
 def get_point(type, id):
     point = Point.objects.get(id=id)
     return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json');
 
 
 @mod_point.route('/<type>/<id>', methods=['PUT'])
+@crossdomain(origin='*')
 @oauth.require_oauth('email')
 def update_point(type, id):
     point = Point.objects.get(id=id)
@@ -87,6 +91,7 @@ def update_point(type, id):
 
 
 @mod_point.route('/<type>', methods=['POST'])
+@crossdomain(origin='*')
 @oauth.require_oauth('email')
 def add_point(type):
     try:
@@ -157,6 +162,7 @@ def add_point(type):
 
 
 @mod_point.route('/<type>/<id>', methods=['DELETE'])
+@crossdomain(origin='*')
 @oauth.require_oauth('email')
 def delete_point(type, id):
     point = Point.objects(id=id)
