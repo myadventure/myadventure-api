@@ -7,6 +7,8 @@ Point module MongoEngine models
 from mongoengine import Document
 from mongoengine import fields
 
+from app.mod_adventure.models import Adventure
+
 
 class Point(Document):
     title = fields.StringField()
@@ -21,6 +23,7 @@ class Point(Document):
     thumb = fields.StringField()
     photo = fields.StringField()
     video = fields.StringField()
+    adventure = fields.ReferenceField(Adventure)
 
     def to_dict(self):
         result = self.to_mongo()

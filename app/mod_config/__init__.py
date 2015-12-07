@@ -1,4 +1,0 @@
-"""
-Initialize config module
-
-"""

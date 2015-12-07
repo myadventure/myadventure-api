@@ -12,7 +12,6 @@ import bson
 from instagram.client import InstagramAPI
 
 from app.mod_point.models import Point
-from app.mod_config.models import Config
 from app.mod_auth import oauth
 
 api = None
@@ -102,6 +101,7 @@ def import_media(access_token, client_secret):
 @mod_instagram.route('/load', methods=['GET'])
 @oauth.require_oauth('email')
 def load_instagram():
+    # TODO: find instagram object by adventure
     access_token = Config.objects(name='instagram_access_token').order_by('-date_added').first()
 
     if access_token is None:

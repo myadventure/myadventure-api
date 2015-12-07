@@ -12,7 +12,6 @@ from datetime import datetime
 import bson
 
 from app.mod_point.models import Point
-from app.mod_config.models import Config
 
 from app.mod_auth import oauth
 
@@ -87,20 +86,11 @@ def load_data(url):
     return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
 
 
-@mod_delorme.route('/load', methods=['GET'])
+@mod_delorme.route('/load/<adventure>', methods=['GET'])
 @oauth.require_oauth('email')
 def load_tracker():
+    # TODO: find tracker object by adventure
     tracker_url = Config.objects(name='tracker_url').order_by('-date_added').first()
     if tracker_url is None:
         return Response(bson.json_util.dumps({'error': 'tracker_url configuration was not found.'}), status=500, mimetype='application/json')
-
-    tracker_type = Config.objects(name='tracker_type').order_by('-date_added').first()
-    if tracker_type is None:
-        return Response(bson.json_util.dumps({'error': 'tracker_type configuration was not found.'}), status=500, mimetype='application/json')
-
-    if tracker_type.value == 'delorme':
-        return load_data(tracker_url.value)
-    elif tracker_type.value == 'spot':
-        return Response(bson.json_util.dumps({'error': 'tracker not supported.'}), status=400, mimetype='application/json')
-    else:
-        return Response(bson.json_util.dumps({'error': 'tracker not supported.'}), status=400, mimetype='application/json')
+    return load_data(tracker_url.value)

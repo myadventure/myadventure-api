@@ -11,7 +11,6 @@ import json
 import bson
 
 from app.mod_point.models import Point
-from app.mod_config.models import Config
 from app.mod_auth import oauth
 
 mod_flickr = Blueprint('flickr', __name__, url_prefix='/api/v1/flickr')
@@ -78,6 +77,7 @@ def import_photos(username, photoset_title, api_key, api_secret):
 @mod_flickr.route('/load', methods=['GET'])
 @oauth.require_oauth('email')
 def load_flickr():
+    # TODO: find flickr object by adventure
     user_id = Config.objects(name='flickr_username').order_by('-date_added').first()
 
     if user_id is None:
