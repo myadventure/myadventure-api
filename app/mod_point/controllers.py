@@ -21,12 +21,10 @@ mod_point = Blueprint('point', __name__, url_prefix='/api/v1/point')
 @mod_point.route('/<type>', methods=['GET'])
 @crossdomain(origin='*')
 def list_point(type):
-    points_dict = None
-    if points_dict is None:
-        points_dict = []
-        points = Point.objects(Point.type == type).order_by('timestamp', 'pointid')
-        for point in points:
-            points_dict.append(point.to_dict())
+    points_dict = []
+    points = Point.objects(Point.type == type).order_by('timestamp', 'pointid')
+    for point in points:
+        points_dict.append(point.to_dict())
 
     return Response(bson.json_util.dumps(points_dict), mimetype='application/json');
 
@@ -87,7 +85,7 @@ def update_point(type, id):
         logging.error(e)
         abort(500)
 
-    return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json');
+    return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json')
 
 
 @mod_point.route('/<type>', methods=['POST'])

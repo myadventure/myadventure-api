@@ -18,7 +18,7 @@ class Adventure(Document):
     :param ref delorme: reference to a Delorme tracker
 
     """
+    slug = fields.StringField(primary_key=True)
     name = fields.StringField()
-    slug = fields.StringField(unique=True)
     delorme = fields.ReferenceField(Delorme)
 

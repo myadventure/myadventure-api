@@ -25,4 +25,4 @@ class User(Document):
     facebook_id = fields.IntField(unique=True)
     name = fields.StringField()
     facebook_access_token = fields.StringField()
-    adventures = fields.ListField(fields.EmbeddedDocumentField(Adventure))
+    adventures = fields.ListField(fields.ReferenceField(Adventure))
