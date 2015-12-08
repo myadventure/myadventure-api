@@ -7,6 +7,7 @@ Adventure module MongoEngine models
 from mongoengine import Document
 from mongoengine import fields
 
+from app.mod_user.models import User
 from app.mod_delorme.models import Delorme
 
 
@@ -20,5 +21,6 @@ class Adventure(Document):
     """
     slug = fields.StringField(primary_key=True)
     name = fields.StringField()
+    users = fields.ListField(fields.ReferenceField(User))
     delorme = fields.ReferenceField(Delorme)
 

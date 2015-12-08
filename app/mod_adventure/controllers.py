@@ -3,13 +3,13 @@ controllers.py
 
 Adventure module controllers.
 """
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, Response
+from mongoengine import DoesNotExist
 from werkzeug.exceptions import BadRequest
 import logging
 from slugify import slugify
 
 from app.mod_adventure.models import Adventure
-from app.mod_user.models import User
 from app.mod_auth import oauth
 from app.decorators import crossdomain
 
@@ -21,18 +21,22 @@ mod_adventure = Blueprint('adventure', __name__, url_prefix='/api/v1/adventure')
 @oauth.require_oauth('email')
 def list_adventures():
     user = request.oauth.user
-    adventures = user.adventures
-    adventures_dict = []
-    for adventure in adventures:
-        print adventure.to_mongo()
-    return jsonify({})
+    adventures = Adventure.objects(users=user)
+    return Response(adventures.to_json(), mimetype='application/json')
 
 
 @mod_adventure.route('/<slug>', methods=['GET'])
 @crossdomain(origin='*')
 def get_adventure(slug):
-    adventure = Adventure.objects.get(slug=slug)
-    return jsonify(adventure.to_mongo())
+    try:
+        adventure = Adventure.objects.get(slug=slug)
+        return jsonify(adventure.to_mongo())
+    except DoesNotExist:
+        abort(404)
+    except Exception as e:
+        logging.error(e)
+        abort(500)
+    return
 
 
 @mod_adventure.route('/', methods=['POST'])
@@ -44,10 +48,10 @@ def add_adventure():
         user = request.oauth.user
         adventure = Adventure(
             slug=slugify(name),
-            name=name
+            name=name,
+            users=[user]
         )
         adventure.save()
-        user.update(add_to_set__adventures=[adventure])
 
         return jsonify(adventure.to_mongo())
     except TypeError as e:
@@ -58,7 +62,6 @@ def add_adventure():
     except Exception as e:
         logging.error(e)
         abort(500)
-
     return
 
 
@@ -66,17 +69,13 @@ def add_adventure():
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def delete_point(slug):
-    adventure = Adventure.objects(slug=slug)
+    adventure = Adventure.objects.get(slug=slug)
     try:
         adventure.delete()
-        User.objects(adventures__id=adventure.id).update(pull__adventures=adventure)
         return jsonify(adventure.to_mongo())
-    except TypeError:
-        abort(400)
-    except BadRequest:
-        abort(400)
+    except DoesNotExist:
+        abort(404)
     except Exception as e:
         logging.error(e)
         abort(500)
-
     return

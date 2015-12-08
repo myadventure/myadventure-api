@@ -156,7 +156,7 @@ def add_point(type):
         logging.error(e)
         abort(500)
 
-    return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json');
+    return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json')
 
 
 @mod_point.route('/<type>/<id>', methods=['DELETE'])

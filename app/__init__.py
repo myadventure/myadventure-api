@@ -4,8 +4,7 @@ Initialize application
 """
 import os
 from mongoengine import connect
-from flask import Flask
-
+from flask import Flask, jsonify
 from app.mod_point.controllers import mod_point
 from app.mod_route.controllers import mod_route
 from app.mod_delorme.controllers import mod_delorme
@@ -33,19 +32,19 @@ oauth.init_app(app)
 @app.errorhandler(400)
 def bad_request(e):
     """Return a custom 400 error."""
-    return 'The browser (or proxy) sent a request that this server could not understand.', 400
+    return jsonify(error='The browser (or proxy) sent a request that this server could not understand.'), 400
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     """Return a custom 404 error."""
-    return 'Sorry, Nothing at this URL.', 404
+    return jsonify(error='Sorry, Nothing at this URL.'), 404
 
 
 @app.errorhandler(500)
 def internal_error(e):
     """Return a custom 500 error."""
-    return 'Sorry, unexpected error: {}'.format(e), 500
+    return jsonify(error='Sorry, unexpected error: {}'.format(e)), 500
 
 # Registering module blueprints
 app.register_blueprint(mod_point)
