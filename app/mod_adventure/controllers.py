@@ -44,7 +44,7 @@ def get_adventure(slug):
 @oauth.require_oauth('email')
 def add_adventure():
     try:
-        name = request.values.get('name')
+        name = request.values.get('name', None)
         user = request.oauth.user
         adventure = Adventure(
             slug=slugify(name),

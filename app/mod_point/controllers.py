@@ -4,11 +4,9 @@ controllers.py
 Point module controllers.
 """
 
-from flask import Blueprint, request, Response, abort
+from flask import Blueprint, request, Response, abort, jsonify
 from werkzeug.exceptions import BadRequest
 from datetime import datetime
-import json
-import bson
 import logging
 
 from app.mod_point.models import Point
@@ -18,64 +16,43 @@ from app.decorators import crossdomain
 mod_point = Blueprint('point', __name__, url_prefix='/api/v1/point')
 
 
-@mod_point.route('/<type>', methods=['GET'])
+@mod_point.route('/<adventure_slug>/<point_type>', methods=['GET'])
 @crossdomain(origin='*')
-def list_point(type):
-    points_dict = []
-    points = Point.objects(Point.type == type).order_by('timestamp', 'pointid')
-    for point in points:
-        points_dict.append(point.to_dict())
-
-    return Response(bson.json_util.dumps(points_dict), mimetype='application/json');
+def list_point(adventure_slug, point_type):
+    points = Point.objects(adventure=adventure_slug, type=point_type)
+    return Response(points.to_json(), mimetype='application/json')
 
 
-@mod_point.route('/<type>/<id>', methods=['GET'])
+@mod_point.route('/<point_id>', methods=['GET'])
 @crossdomain(origin='*')
-def get_point(type, id):
-    point = Point.objects.get(id=id)
-    return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json');
+def get_point(point_id):
+    point = Point.objects.get(id=point_id)
+    return jsonify(point.to_mongo())
 
 
-@mod_point.route('/<type>/<id>', methods=['PUT'])
+@mod_point.route('/<point_id>', methods=['PUT'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
-def update_point(type, id):
-    point = Point.objects.get(id=id)
+def update_point(point_id):
+    point = Point.objects.get(id=point_id)
 
     try:
-        data = json.loads(request.data)
+        update = {
+            'set__title': request.form.get('title', None),
+            'set__latitude': float(request.form.get('latitude', None)),  # TODO: accept none
+            'set__longitude': float(request.form.get('longitude', None)),  # TODO: accept none
+            'set__desc': request.form.get('desc', None),
+            'set__resource': request.form.get('resource', None),
+            'set__thumb': request.form.get('thumb', None),
+            'set__photo': request.form.get('photo', None),
+            'set__video': request.form.get('video', None),
+            'set__timestamp': datetime.strptime(request.form.get('timestamp', datetime.now()), "%Y-%m-%dT%H:%M:%S.%fZ"),
+            'set__hide': bool(request.form.get('hide', None)),  # TODO: accept none
+            'set__delorme_id': int(request.form.get('delorme_id', None))  # TODO: accept none
+        }
 
-        if 'title' in data:
-            point.title = data['title']
-
-        if 'latitude' in data:
-            point.latitude = float(data['latitude'])
-
-        if 'longitude' in data:
-            point.longitude = float(data['longitude'])
-
-        if 'desc' in data:
-            point.desc = data['desc']
-
-        if 'resource' in data:
-            point.resource = data['resource']
-
-        if 'thumb' in data:
-            point.thumb = data['thumb']
-
-        if 'photo' in data:
-            point.photo = data['photo']
-
-        if 'video' in data:
-            point.video = data['video']
-
-        if 'timestamp' in data:
-            point.timestamp = datetime.strptime(data['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
-
-        if 'hide' in data:
-            point.hide = bool(data['hide'])
-
-        point.save()
+        point.update(**update)
+        return jsonify(point)
     except TypeError:
         abort(400)
     except BadRequest as e:
@@ -84,70 +61,33 @@ def update_point(type, id):
     except Exception as e:
         logging.error(e)
         abort(500)
+    return
 
-    return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json')
 
-
-@mod_point.route('/<type>', methods=['POST'])
+@mod_point.route('/<adventure_slug>/<point_type>', methods=['POST'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
-def add_point(type):
+def add_point(adventure_slug, point_type):
     try:
-        data = json.loads(request.data)
-
-        title = None
-        if 'title' in data:
-            title = data['title']
-
-        if 'latitude' in data:
-            latitude = float(data['latitude'])
-        else:
-            abort(400)
-
-        if 'longitude' in data:
-            longitude = float(data['longitude'])
-        else:
-            abort(400)
-
-        desc = None
-        if 'desc' in data:
-            desc = data['desc']
-
-        resource = None
-        if 'resource' in data:
-            resource = data['resource']
-
-        thumb = None
-        if 'thumb' in data:
-            thumb = data['thumb']
-
-        photo = None
-        if 'photo' in data:
-            photo = data['photo']
-
-        video = None
-        if 'video' in data:
-            video = data['video']
-
-        timestamp = datetime.now()
-        if 'timestamp' in data:
-            timestamp = datetime.strptime(data['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
-
         point = Point(
-            title=title,
-            latitude=latitude,
-            longitude=longitude,
-            desc=desc,
-            resource=resource,
-            timestamp=timestamp,
-            thumb=thumb,
-            photo=photo,
-            video=video,
-            type=type
+            title=request.form.get('title', None),
+            latitude=float(request.form.get('latitude', None)),  # TODO: accept none
+            longitude=float(request.form.get('longitude', None)),  # TODO: accept none
+            desc=request.form.get('desc', None),
+            resource=request.form.get('resource', None),
+            timestamp=datetime.strptime(request.form.get('timestamp', None), "%Y-%m-%dT%H:%M:%S.%fZ"),
+            thumb=request.form.get('thumb', None),
+            photo=request.form.get('photo', None),
+            video=request.form.get('video', None),
+            hide=bool(request.form.get('hide', None)),  # TODO: accept none
+            delorme_id=int(request.form.get('delorme_id', None)),  # TODO: accept none
+            type=point_type,
+            adventure=adventure_slug
         )
-
         point.save()
-    except TypeError:
+        return jsonify(point)
+    except TypeError as e:
+        logging.error(e)
         abort(400)
     except BadRequest as e:
         logging.error(e)
@@ -155,17 +95,17 @@ def add_point(type):
     except Exception as e:
         logging.error(e)
         abort(500)
+    return
 
-    return Response(bson.json_util.dumps(point.to_dict()), mimetype='application/json')
 
-
-@mod_point.route('/<type>/<id>', methods=['DELETE'])
+@mod_point.route('/<point_id>', methods=['DELETE'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
-def delete_point(type, id):
-    point = Point.objects(id=id)
+def delete_point(point_id):
+    point = Point.objects.get(id=point_id)
     try:
         point.delete()
+        return jsonify(point)
     except TypeError:
         abort(400)
     except BadRequest as e:
@@ -174,5 +114,4 @@ def delete_point(type, id):
     except Exception as e:
         logging.error(e)
         abort(500)
-
-    return Response(bson.json_util.dumps({ 'status': 'ok' }), mimetype='application/json')
+    return

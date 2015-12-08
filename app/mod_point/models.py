@@ -18,7 +18,7 @@ class Point(Document):
     resource = fields.StringField()
     type = fields.StringField(required=True)
     timestamp = fields.DateTimeField(required=True)
-    pointid = fields.IntField()
+    delorme_id = fields.IntField()
     hide = fields.BooleanField(default=False)
     thumb = fields.StringField()
     photo = fields.StringField()
@@ -27,11 +27,6 @@ class Point(Document):
 
     def to_dict(self):
         result = self.to_mongo()
-        result['id'] = str(result['_id'])
-        del result['_id']
-        timestamp = getattr(self, 'timestamp', None)
-        result['timestamp'] = None
-        if timestamp:
-            result['timestamp'] = self.timestamp.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        result['timestamp'] = self.timestamp.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
         return result
