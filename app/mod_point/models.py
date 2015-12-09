@@ -26,7 +26,8 @@ class Point(Document):
     adventure = fields.ReferenceField(Adventure)
 
     def to_dict(self):
-        result = self.to_mongo()
+        result = self.to_mongo().to_dict()
         result['timestamp'] = self.timestamp.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        result['_id'] = str(self.id)
 
         return result

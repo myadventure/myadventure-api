@@ -48,3 +48,30 @@ def crossdomain(origin=None, methods=None, headers=None,
         f.provide_automatic_options = False
         return update_wrapper(wrapped_function, f)
     return decorator
+
+
+def ignore_exception(exception=Exception, default=None):  # http://stackoverflow.com/questions/2262333/is-there-a-built-in-or-more-pythonic-way-to-try-to-parse-a-string-to-an-integer
+    """Returns a decorator that ignores an exception raised by the function it
+    decorates.
+
+    :param Exception exception: exception type to catch
+    :param Object default: default value
+
+    Using it as a decorator:
+
+      @ignore_exception(ValueError)
+      def my_function():
+        pass
+
+    Using it as a function wrapper:
+
+      int_try_parse = ignore_exception(ValueError)(int)
+    """
+    def decorator(function):
+        def wrapper(*args, **kwargs):
+            try:
+                return function(*args, **kwargs)
+            except exception:
+                return default
+        return wrapper
+    return decorator
