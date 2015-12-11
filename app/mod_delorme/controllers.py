@@ -11,6 +11,7 @@ import logging
 from datetime import datetime
 import bson
 
+from app.mod_adventure.models import Adventure
 from app.mod_point.models import Point
 
 from app.mod_auth import oauth
@@ -86,11 +87,12 @@ def load_data(url):
     return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
 
 
-@mod_delorme.route('/load/<adventure>', methods=['GET'])
+@mod_delorme.route('/load/<adventure_slug>', methods=['GET'])
 @oauth.require_oauth('email')
-def load_tracker():
-    # TODO: find tracker object by adventure
-    tracker_url = Config.objects(name='tracker_url').order_by('-date_added').first()
-    if tracker_url is None:
-        return Response(bson.json_util.dumps({'error': 'tracker_url configuration was not found.'}), status=500, mimetype='application/json')
-    return load_data(tracker_url.value)
+def load_tracker(adventure_slug):
+    adventure = Adventure.objects().get(slug=adventure_slug)
+    delorme = adventure.delorme
+    if delorme is not None:
+        return load_data(delorme.url)
+    return Response(bson.json_util.dumps({'error': 'DeLorme tracker URL is not configured.'}), status=500, mimetype='application/json')
+
