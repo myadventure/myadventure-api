@@ -8,9 +8,8 @@ from flask import Flask, jsonify
 from app.mod_point.controllers import mod_point
 from app.mod_route.controllers import mod_route
 from app.mod_delorme.controllers import mod_delorme
-from app.mod_spot.controllers import mod_spot
-from app.mod_flickr.controllers import mod_flickr
-from app.mod_instagram.controllers import mod_instagram
+# from app.mod_spot.controllers import mod_spot
+# from app.mod_instagram.controllers import mod_instagram
 from app.mod_auth.controllers import mod_auth
 from app.mod_user.controllers import mod_user
 from app.mod_facebook.controllers import mod_facebook
@@ -50,9 +49,8 @@ def internal_error(e):
 app.register_blueprint(mod_point)
 app.register_blueprint(mod_route)
 app.register_blueprint(mod_delorme)
-app.register_blueprint(mod_spot)
-app.register_blueprint(mod_flickr)
-app.register_blueprint(mod_instagram)
+# app.register_blueprint(mod_spot)
+# app.register_blueprint(mod_instagram)
 app.register_blueprint(mod_auth)
 app.register_blueprint(mod_user)
 app.register_blueprint(mod_facebook)
