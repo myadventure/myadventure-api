@@ -3,7 +3,7 @@ controllers.py
 
 Point module controllers.
 """
-from flask import Blueprint, request, Response, abort, jsonify
+from flask import Blueprint, request, abort, jsonify
 from werkzeug.exceptions import BadRequest
 from datetime import datetime
 import logging
@@ -24,7 +24,10 @@ sbool = ignore_exception(TypeError)(bool)
 @crossdomain(origin='*')
 def list_point(adventure_slug, point_type):
     points = Point.objects(adventure=adventure_slug, type=point_type)
-    return Response(points.to_json(), mimetype='application/json')  # TODO: remove $oid references from json output
+    points_dict = []
+    for point in points:
+        points_dict.append(point.to_dict())
+    return jsonify(points=points_dict)
 
 
 @mod_point.route('/<point_id>', methods=['GET'])
