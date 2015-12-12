@@ -24,3 +24,9 @@ class Adventure(Document):
     users = fields.ListField(fields.ReferenceField(User))
     delorme = fields.ReferenceField(Delorme)
 
+    def to_dict(self):
+        result = self.to_mongo().to_dict()
+        result['_id'] = str(self.id)
+
+        return result
+

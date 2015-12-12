@@ -3,7 +3,7 @@ controllers.py
 
 Adventure module controllers.
 """
-from flask import Blueprint, jsonify, request, abort, Response
+from flask import Blueprint, jsonify, request, abort
 from mongoengine import DoesNotExist
 from werkzeug.exceptions import BadRequest
 import logging
@@ -18,11 +18,24 @@ mod_adventure = Blueprint('adventure', __name__, url_prefix='/api/v1/adventure')
 
 @mod_adventure.route('/', methods=['GET'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
 def list_adventures():
+    adventures = Adventure.objects()
+    adventures_dict = []
+    for adventure in adventures:
+        adventures_dict.append(adventure.to_dict())
+    return jsonify(adventures=adventures_dict)
+
+
+@mod_adventure.route('/me', methods=['GET'])
+@crossdomain(origin='*')
+@oauth.require_oauth('email')
+def list_user_adventures():
     user = request.oauth.user
     adventures = Adventure.objects(users=user)
-    return Response(adventures.to_json(), mimetype='application/json')
+    adventures_dict = []
+    for adventure in adventures:
+        adventures_dict.append(adventure.to_dict())
+    return jsonify(adventures=adventures_dict)
 
 
 @mod_adventure.route('/<slug>', methods=['GET'])
