@@ -19,7 +19,7 @@ from app.mod_auth import oauth
 
 app = Flask(__name__, static_folder=os.getcwd() + '/app/static', static_url_path='', template_folder=os.getcwd() + '/app/templates')
 
-app.config.from_object('config')
+app.config.from_pyfile('config.py', silent=True)
 
 connect(
     host=app.config['MONGODB_URI']
