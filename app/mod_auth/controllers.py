@@ -13,7 +13,6 @@ from werkzeug.security import gen_salt
 from app.mod_auth.models import Client
 from app.mod_auth.models import Grant
 from app.mod_auth.models import Token
-from app.mod_user import current_user
 from app.mod_auth import oauth
 
 mod_auth = Blueprint('auth', __name__, url_prefix='')
@@ -55,7 +54,7 @@ def load_grant(client_id, code):
 def save_grant(client_id, code, request, *args, **kwargs):
     # decide the expires time yourself
     expires = datetime.utcnow() + timedelta(seconds=3600)
-    user = current_user()
+    user = current_user()  # TODO: find another way of getting the user
     grant = Grant(
         client_id=client_id,
         code=code['code'],
@@ -121,13 +120,13 @@ def access_token():
 @mod_auth.route('/oauth/authorize', methods=['GET', 'POST'])
 @oauth.authorize_handler
 def authorize(*args, **kwargs):
-    user = current_user()
+    user = current_user()  # TODO: find another way of getting the user
     if not user:
         client_id = request.args.get('client_id')
         scope = request.args.get('scope')
         redirect_uri = request.args.get('redirect_uri')
         response_type = request.args.get('response_type')
-        return redirect(url_for('facebook.login', client_id=client_id, scope=scope, redirect_uri=redirect_uri, response_type=response_type))
+        return redirect(url_for('facebook.login', client_id=client_id, scope=scope, redirect_uri=redirect_uri, response_type=response_type))  # TODO: no need to do this, just return 401
     if request.method == 'GET':
         client_id = kwargs.get('client_id')
         client = Client.objects.get(client_id=client_id)

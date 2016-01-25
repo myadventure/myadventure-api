@@ -1,4 +1,0 @@
-"""
-Initialize facebook module
-
-"""

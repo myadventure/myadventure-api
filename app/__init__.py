@@ -12,7 +12,6 @@ from app.mod_delorme.controllers import mod_delorme
 # from app.mod_instagram.controllers import mod_instagram
 from app.mod_auth.controllers import mod_auth
 from app.mod_user.controllers import mod_user
-from app.mod_facebook.controllers import mod_facebook
 from app.mod_adventure.controllers import mod_adventure
 from app.mod_user.models import User
 from app.mod_auth import oauth
@@ -53,5 +52,4 @@ app.register_blueprint(mod_delorme)
 # app.register_blueprint(mod_instagram)
 app.register_blueprint(mod_auth)
 app.register_blueprint(mod_user)
-app.register_blueprint(mod_facebook)
 app.register_blueprint(mod_adventure)
