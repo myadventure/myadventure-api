@@ -28,7 +28,7 @@ def client():
         client_id=gen_salt(40),
         client_secret=gen_salt(50),
         _redirect_uris=' '.join([
-            'http://myadventure.dev:8000/authorized'
+            'http://myadventure.dev:8000/authorized'  # TODO: pass redirect uris as a parameter
         ]),
         _default_scopes='email',
         user_id=user.id,

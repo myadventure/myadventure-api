@@ -20,4 +20,6 @@ class User(Document):
     email = fields.StringField(unique=True)
     facebook_id = fields.IntField(unique=True)
     name = fields.StringField()
+    salt = fields.StringField()
+    password = fields.StringField()
     facebook_access_token = fields.StringField()
