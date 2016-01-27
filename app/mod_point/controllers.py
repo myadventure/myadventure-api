@@ -10,7 +10,7 @@ import logging
 
 from app.decorators import ignore_exception
 from app.mod_point.models import Point
-from app.mod_auth import oauth
+from app.mod_auth.controllers import oauth
 from app.decorators import crossdomain
 
 mod_point = Blueprint('point', __name__, url_prefix='/api/v1/point')

@@ -14,7 +14,7 @@ import bson
 from app.mod_adventure.models import Adventure
 from app.mod_point.models import Point
 
-from app.mod_auth import oauth
+from app.mod_auth.controllers import oauth
 
 mod_delorme = Blueprint('delorme', __name__, url_prefix='/api/v1/delorme')
 

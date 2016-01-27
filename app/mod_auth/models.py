@@ -6,6 +6,7 @@ Auth module MongoEngine models
 
 from mongoengine import Document
 from mongoengine import fields
+from werkzeug.security import gen_salt
 
 from app.mod_user.models import User
 
@@ -15,13 +16,19 @@ class Client(Document):
     user = fields.ReferenceField(User)
 
     client_id = fields.StringField(primary_key=True)
-    client_secret = fields.StringField(null=False, unique=True)
+    client_secret = fields.StringField(null=False)
 
-    # public or confidential
     is_confidential = fields.BooleanField()
 
     _redirect_uris = fields.StringField()
     _default_scopes = fields.StringField()
+
+    @property
+    def allowed_grant_types(self):
+        """ Returns allowed grant types.
+        Presently, only the password grant type is allowed.
+        """
+        return ['password']
 
     @property
     def client_type(self):
@@ -44,6 +51,22 @@ class Client(Document):
         if self._default_scopes:
             return self._default_scopes.split()
         return []
+
+    @property
+    def has_password_credential_permission(self):
+        return True
+
+    @staticmethod
+    def generate(redirect_uris):
+
+        item = Client(
+            client_id=gen_salt(40),
+            client_secret=gen_salt(50),
+            _redirect_uris=' '.join(redirect_uris),
+            _default_scopes='email',
+            user_id=None,
+        )
+        item.save()
 
 
 class Grant(Document):

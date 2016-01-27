@@ -14,7 +14,7 @@ import urllib2
 from app.decorators import crossdomain
 from app.mod_point.models import Point
 
-from app.mod_auth import oauth
+from app.mod_auth.controllers import oauth
 
 mod_route = Blueprint('route', __name__, url_prefix='/api/v1/route')
 

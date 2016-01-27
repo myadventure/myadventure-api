@@ -14,7 +14,7 @@ from app.mod_auth.controllers import mod_auth
 from app.mod_user.controllers import mod_user
 from app.mod_adventure.controllers import mod_adventure
 from app.mod_user.models import User
-from app.mod_auth import oauth
+from app.mod_auth.controllers import oauth
 
 app = Flask(__name__, static_folder=os.getcwd() + '/app/static', static_url_path='', template_folder=os.getcwd() + '/app/templates')
 

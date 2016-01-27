@@ -11,7 +11,7 @@ from flask import Blueprint, request, jsonify, abort
 from mongoengine import NotUniqueError
 from werkzeug.security import gen_salt
 
-from app.mod_auth import oauth
+from app.mod_auth.controllers import oauth
 from app.mod_user.models import User
 
 mod_user = Blueprint('user', __name__, url_prefix='/api/v1/user')

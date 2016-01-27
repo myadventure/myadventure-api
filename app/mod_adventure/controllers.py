@@ -10,7 +10,7 @@ import logging
 from slugify import slugify
 
 from app.mod_adventure.models import Adventure
-from app.mod_auth import oauth
+from app.mod_auth.controllers import oauth
 from app.decorators import crossdomain
 
 mod_adventure = Blueprint('adventure', __name__, url_prefix='/api/v1/adventure')
