@@ -5,7 +5,7 @@
     <title>Login</title>
 </head>
 <body>
-    <form action="{{ url_for('auth.login') }}" method="post">
+    <form action="{{ url_for('auth.login', **values) }}" method="post">
         {{ form.hidden_tag() }}
         <dl>
             <dt>{{ form.email.label }}

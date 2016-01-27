@@ -1,10 +1,13 @@
 """
-models.py
+controllers.py
 
 Auth module controllers.
 """
+import logging
+import urllib
+
 from flask import Blueprint, request, render_template, abort, redirect, url_for
-from flask_login import current_user, login_user, LoginManager, login_required
+from flask_login import current_user, login_user, LoginManager, login_required, logout_user
 from flask_oauthlib.provider import OAuth2Provider
 
 from app.mod_user.models import User
@@ -28,7 +31,6 @@ def next_is_valid(next):
 @mod_auth.record_once
 def on_load(state):
     login_manager.init_app(state.app)
-    login_manager.login_view = ".login"
 
 
 @login_manager.user_loader
@@ -52,17 +54,33 @@ def login():
 
                 next = request.args.get('next')
 
+                if next:
+                    params = dict((key, request.args.get(key)) for key in request.args.keys())
+                    del params['next']
+                    next = next + '?' + urllib.urlencode(params)
+
+                logging.warning(next)
+
                 if not next_is_valid(next):
                     return abort(401)
-                return redirect(next or url_for(".authorize"))
+                return redirect(next or url_for("user.me"))
             return abort(401)
         return abort(400)
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, values=request.args)
+
+
+@mod_auth.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    next = request.args.get('next')
+    return redirect(next or url_for(".login"))
 
 
 @mod_auth.route('/oauth/token', methods=['POST'])
 @oauth.token_handler
 def access_token():
+    logging.warning(request.form)
     return None
 
 
@@ -75,8 +93,13 @@ def revoke_token():
 
 @mod_auth.route('/oauth/authorize', methods=['GET', 'POST'])
 @oauth.authorize_handler
-@login_required
 def authorize(*args, **kwargs):
+    if current_user.is_anonymous:
+        values = kwargs
+        del values['request']
+        del values['state']
+        values['next'] = url_for('.authorize')
+        return redirect(url_for('.login', **values))
     if request.method == 'GET':
         client_id = kwargs.get('client_id')
         client = Client.objects.get(client_id=client_id)

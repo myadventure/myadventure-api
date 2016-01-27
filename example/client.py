@@ -1,5 +1,7 @@
+import logging
+
 from flask import Flask, url_for, session, request, jsonify
-from flask_oauthlib.client import OAuth
+from flask_oauthlib.client import OAuth, OAuthException
 
 CLIENT_ID = '1EssHrEXtGdmJHFQ2YEU1leNsHljVPZp1RmRsYDZ'
 CLIENT_SECRET = 'WtAikOHT38puo0FHhNrqYbCi6shLFSJjsmc2KVsms8i7utni1h'
@@ -43,6 +45,8 @@ def authorized():
             request.args['error_reason'],
             request.args['error_description']
         )
+    if isinstance(resp, OAuthException):
+        return 'Access denied: %s' % resp.message
     session['remote_oauth'] = (resp['access_token'], '')
     return jsonify(oauth_token=resp['access_token'])
 

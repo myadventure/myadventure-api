@@ -25,10 +25,8 @@ class Client(Document):
 
     @property
     def allowed_grant_types(self):
-        """ Returns allowed grant types.
-        Presently, only the password grant type is allowed.
-        """
-        return ['password']
+        """ Returns allowed grant types."""
+        return ['password', 'authorization_code']
 
     @property
     def client_type(self):

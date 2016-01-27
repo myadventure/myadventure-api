@@ -6,7 +6,7 @@ Auth module validators
 import logging
 from datetime import datetime, timedelta
 
-from flask.ext.login import current_user
+from flask_login import current_user
 from flask.ext.oauthlib.provider import OAuth2RequestValidator
 from flask.ext.oauthlib.utils import decode_base64
 from mongoengine import DoesNotExist
@@ -17,13 +17,21 @@ from models import Client, Grant, Token
 
 
 def load_client(client_id):
-    return Client.objects.get(client_id=client_id)
+    try:
+        return Client.objects.get(client_id=client_id)
+    except DoesNotExist as e:
+        logging.error(e)
+        return None
 
 
 def load_user(email, password, client, request, *args, **kwargs):
     if not client.has_password_credential_permission:
         return None
-    user = User.objects.get(email=email)
+    try:
+        user = User.objects.get(email=email)
+    except DoesNotExist as e:
+        logging.error(e)
+        return None
     if not user.validate_password(password):
         return None
 
@@ -36,7 +44,7 @@ def load_grant(client_id, code, *args, **kwargs):
 
 def save_grant(client_id, code, request, *args, **kwargs):
     expires = datetime.utcnow() + timedelta(seconds=3600)
-    user = current_user
+    user = User.objects.get(id=current_user.id)
     grant = Grant(
         client_id=client_id,
         code=code['code'],
@@ -108,14 +116,14 @@ class RequestValidator(OAuth2RequestValidator):
                 client_id, client_secret = decode_base64(s).split(':')
                 client_id = to_unicode(client_id, 'utf-8')
             except Exception as e:
-                logging.debug('Authenticate client failed with exception: %r', e)
+                logging.warning('Authenticate client failed with exception: %r', e)
                 return False
         else:
             client_id = request.client_id
 
         client = self._clientgetter(client_id)
         if not client:
-            logging.debug('Authenticate client failed, client not found.')
+            logging.warning('Authenticate client failed, client not found.')
             return False
 
         if client.client_type == 'public':
