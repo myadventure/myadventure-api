@@ -5,7 +5,6 @@ User module controllers.
 """
 import hashlib
 import logging
-import traceback
 
 from flask import Blueprint, request, jsonify, abort
 from mongoengine import NotUniqueError
@@ -38,11 +37,10 @@ def add_user():
         )
         user.save()
         return jsonify({"user": user.to_mongo()})
-    except TypeError:
-        abort(400)
     except NotUniqueError:
         return jsonify({"user": user.to_mongo()})
+    except TypeError:
+        abort(400)
     except Exception as e:
         logging.error(e.args[0])
-        traceback.print_exc()
         abort(500)

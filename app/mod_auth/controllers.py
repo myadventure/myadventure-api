@@ -3,10 +3,9 @@ controllers.py
 
 Auth module controllers.
 """
-import logging
 import urllib
 
-from flask import Blueprint, request, render_template, abort, redirect, url_for
+from flask import Blueprint, request, render_template, abort, redirect, url_for, jsonify
 from flask_login import current_user, login_user, LoginManager, login_required, logout_user
 from flask_oauthlib.provider import OAuth2Provider
 
@@ -59,11 +58,10 @@ def login():
                     del params['next']
                     next = next + '?' + urllib.urlencode(params)
 
-                logging.warning(next)
-
                 if not next_is_valid(next):
                     return abort(401)
-                return redirect(next or url_for("user.me"))
+
+                return redirect(next or jsonify({"status": "ok"}))
             return abort(401)
         return abort(400)
     return render_template('login.html', form=form, values=request.args)
@@ -74,13 +72,12 @@ def login():
 def logout():
     logout_user()
     next = request.args.get('next')
-    return redirect(next or url_for(".login"))
+    return redirect(next or jsonify({"status": "ok"}))
 
 
 @mod_auth.route('/oauth/token', methods=['POST'])
 @oauth.token_handler
 def access_token():
-    logging.warning(request.form)
     return None
 
 

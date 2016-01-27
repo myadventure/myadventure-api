@@ -19,8 +19,8 @@ from models import Client, Grant, Token
 def load_client(client_id):
     try:
         return Client.objects.get(client_id=client_id)
-    except DoesNotExist as e:
-        logging.error(e)
+    except DoesNotExist:
+        logging.info("Client not found.")
         return None
 
 
@@ -29,8 +29,8 @@ def load_user(email, password, client, request, *args, **kwargs):
         return None
     try:
         user = User.objects.get(email=email)
-    except DoesNotExist as e:
-        logging.error(e)
+    except DoesNotExist:
+        logging.info("User not found.")
         return None
     if not user.validate_password(password):
         return None
@@ -116,14 +116,14 @@ class RequestValidator(OAuth2RequestValidator):
                 client_id, client_secret = decode_base64(s).split(':')
                 client_id = to_unicode(client_id, 'utf-8')
             except Exception as e:
-                logging.warning('Authenticate client failed with exception: %r', e)
+                logging.info('Authenticate client failed with exception: %r', e)
                 return False
         else:
             client_id = request.client_id
 
         client = self._clientgetter(client_id)
         if not client:
-            logging.warning('Authenticate client failed, client not found.')
+            logging.info('Authenticate client failed, client not found.')
             return False
 
         if client.client_type == 'public':
