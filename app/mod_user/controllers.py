@@ -20,7 +20,7 @@ mod_user = Blueprint('user', __name__, url_prefix='/api/v1/user')
 @oauth.require_oauth('email')
 def me():
     user = request.oauth.user
-    return jsonify(email=user.email)
+    return jsonify(user=user.to_mongo())
 
 
 @mod_user.route('/', methods=['POST'])
