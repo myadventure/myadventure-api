@@ -54,6 +54,10 @@ class Client(Document):
     def has_password_credential_permission(self):
         return True
 
+    @property
+    def has_facebook_credential_permission(self):
+        return True
+
     @staticmethod
     def generate(redirect_uris):
 

@@ -4,6 +4,7 @@ validators.py
 Auth module validators
 """
 import logging
+import re
 from datetime import datetime, timedelta
 
 from flask_login import current_user
@@ -13,6 +14,7 @@ from mongoengine import DoesNotExist
 from oauthlib.common import to_unicode
 
 from app.mod_user.models import User
+from app.mod_facebook.models import Facebook
 from models import Client, Grant, Token
 
 
@@ -24,18 +26,51 @@ def load_client(client_id):
         return None
 
 
-def load_user(email, password, client, request, *args, **kwargs):
-    if not client.has_password_credential_permission:
-        return None
-    try:
-        user = User.objects.get(email=email)
-    except DoesNotExist:
-        logging.info("User not found.")
-        return None
-    if not user.validate_password(password):
-        return None
+def load_user(username, password, client, request, *args, **kwargs):
+    if re.match(r"[^@]+@[^@]+\.[^@]+", username):
+        if not client.has_password_credential_permission:
+            return None
+        try:
+            user = User.objects.get(email=username)
+        except DoesNotExist:
+            logging.info("User not found.")
+            return None
+        if not user.validate_password(password):
+            return None
 
-    return user
+        return user
+    elif username.isdigit():
+        if not client.has_facebook_credential_permission:
+            return None
+
+        try:
+            facebook = Facebook(password)
+            me = facebook.get('/me', params={'fields': 'id,name,email,link'})
+        except client.OAuthException:
+            return None
+        except Exception as e:
+            logging.error(e)
+            return None
+
+        try:
+            user = User.objects.get(facebook_id=username)
+        except DoesNotExist:
+            facebook_id = me['id']
+            email = me['email']
+            name = me['name']
+            user = User(
+                facebook_id=facebook_id,
+                email=email,
+                name=name,
+                password=None,
+                salt=None,
+            )
+            user.save()
+
+        return user
+    else:
+        logging.warning("Username not recognized.")
+        return None
 
 
 def load_grant(client_id, code, *args, **kwargs):
