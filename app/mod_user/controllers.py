@@ -7,10 +7,11 @@ import hashlib
 import logging
 
 from flask import Blueprint, request, jsonify, abort
-from mongoengine import NotUniqueError
+from mongoengine import NotUniqueError, DoesNotExist
 from werkzeug.security import gen_salt
 
 from app.mod_auth.controllers import oauth
+from app.mod_auth.models import Client
 from app.mod_user.models import User
 
 mod_user = Blueprint('user', __name__, url_prefix='/api/v1/user')
@@ -28,6 +29,17 @@ def add_user():
     try:
         email = request.form.get('email')
         password = request.form.get('password')
+        client_id = request.form.get('client_id')
+
+        try:
+            client = Client.objects.get(client_id=client_id)
+        except DoesNotExist:
+            logging.info("Client not found.")
+            return abort(400)
+
+        if not client.has_password_credential_permission:
+            return abort(400)
+
         salt = gen_salt(40)
         hashed_password = hashlib.sha512(password + salt).hexdigest()
         user = User(
@@ -38,9 +50,10 @@ def add_user():
         user.save()
         return jsonify({"user": user.to_mongo()})
     except NotUniqueError:
-        return jsonify({"user": user.to_mongo()})
+        logging.info("Duplicate user.")
+        return abort(400)
     except TypeError:
-        abort(400)
+        return abort(400)
     except Exception as e:
         logging.error(e.args[0])
-        abort(500)
+        return abort(500)

@@ -19,7 +19,7 @@ class User(Document):
     """
     id = fields.SequenceField(primary_key=True)
     email = fields.StringField(unique=True)
-    facebook_id = fields.IntField(unique=True)
+    facebook_id = fields.IntField(unique=True, sparse=True)
     name = fields.StringField()
     salt = fields.StringField()
     password = fields.StringField()
