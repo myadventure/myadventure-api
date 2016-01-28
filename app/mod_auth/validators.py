@@ -54,6 +54,8 @@ def load_user(username, password, client, request, *args, **kwargs):
 
         try:
             user = User.objects.get(facebook_id=username)
+            user.facebook_access_token = password
+            user.save()
         except DoesNotExist:
             facebook_id = me['id']
             email = me['email']
@@ -62,6 +64,7 @@ def load_user(username, password, client, request, *args, **kwargs):
                 facebook_id=facebook_id,
                 email=email,
                 name=name,
+                facebook_access_token=password,
                 password=None,
                 salt=None,
             )
