@@ -16,8 +16,7 @@ RUN apt-get install -y build-essential git
 RUN apt-get install -y python python-dev python-setuptools
 RUN apt-get install -y python-pip python-virtualenv
 RUN apt-get install -y supervisor
-RUN apt-get install -y libxml2-dev libxslt1-dev python-dev
-RUN apt-get install -y zlib1g-dev
+RUN apt-get install -y libxml2-dev libxslt1-dev zlib1g-dev
 
 # stop supervisor service as we'll run it manually
 RUN service supervisor stop
