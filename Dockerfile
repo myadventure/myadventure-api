@@ -31,7 +31,7 @@ RUN /opt/venv/bin/pip install -r /opt/venv/requirements.txt
 RUN /opt/venv/bin/pip install gunicorn
 
 # expose port(s)
-EXPOSE 80
+EXPOSE 5000
 
 # install supervisor-stdout
 RUN pip install supervisor-stdout
