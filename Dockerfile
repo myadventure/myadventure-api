@@ -25,7 +25,7 @@ RUN service supervisor stop
 # create a virtual environment and install all dependencies from pypi
 RUN virtualenv /opt/venv
 ADD requirements.txt /opt/venv/requirements.txt
-RUN pip install -r /opt/venv/requirements.txt
+RUN /opt/venv/bin/pip install -r /opt/venv/requirements.txt
 
 # install gunicorn
 RUN /opt/venv/bin/pip install gunicorn
