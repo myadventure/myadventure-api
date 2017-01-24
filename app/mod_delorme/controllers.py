@@ -17,10 +17,11 @@ from app.mod_delorme.models import Delorme
 from app.decorators import crossdomain
 from app.mod_auth.controllers import oauth
 
-mod_delorme = Blueprint('delorme', __name__, url_prefix='/api/v1/delorme')
+MOD_DELORME = Blueprint('delorme', __name__, url_prefix='/api/v1/delorme')
 
 
 def load_data(url):
+    """Load DeLorme inReach data from specified feed URL."""
     obj = urllib2.urlopen(url)
     root = parser.parse(obj).getroot()
     for placemark in root.Document.Folder.Placemark:
@@ -82,26 +83,28 @@ def load_data(url):
                 point.save()
         except AttributeError:
             pass
-        except Exception as e:
-            logging.error(e.args[0])
 
     return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
 
 
-@mod_delorme.route('/<adventure_slug>/load', methods=['GET'])
+@MOD_DELORME.route('/<adventure_slug>/load', methods=['GET'])
 @oauth.require_oauth('email')
 def load_tracker(adventure_slug):
+    """Load DeLorme inReach tracker points from configured feed URL."""
     adventure = Adventure.objects().get(slug=adventure_slug)
     delorme = adventure.delorme
     if delorme is not None:
         return load_data(delorme.url)
-    return Response(bson.json_util.dumps({'error': 'DeLorme tracker URL is not configured.'}), status=500, mimetype='application/json')
+    return Response(bson.json_util.dumps( \
+        {'error': 'DeLorme tracker URL is not configured.'} \
+    ), status=500, mimetype='application/json')
 
 
-@mod_delorme.route('/<adventure_slug>', methods=['POST'])
+@MOD_DELORME.route('/<adventure_slug>', methods=['POST'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def add_tracker(adventure_slug):
+    """Add tracker feed URL to Adventure object defined by adventure_slug"""
     try:
         adventure = Adventure.objects.get(slug=adventure_slug)
         url = request.values.get('url', None)

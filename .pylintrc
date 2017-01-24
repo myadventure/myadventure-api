@@ -1,2 +1,3 @@
 [TYPECHECK]
-generated-members=objects,id
+generated-members=objects, id
+disable=R0912, R0913, R0914, R0915
