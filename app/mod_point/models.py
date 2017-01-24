@@ -16,7 +16,7 @@ class Point(Document):
     latitude = fields.FloatField()
     longitude = fields.FloatField()
     resource = fields.StringField()
-    type = fields.StringField(required=True)
+    point_type = fields.StringField(required=True)
     timestamp = fields.DateTimeField(required=True)
     delorme_id = fields.IntField()
     hide = fields.BooleanField(default=False)

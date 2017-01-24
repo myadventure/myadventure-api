@@ -3,20 +3,20 @@ controllers.py
 
 Adventure module controllers.
 """
+import logging
 from flask import Blueprint, jsonify, request, abort
 from mongoengine import DoesNotExist
 from werkzeug.exceptions import BadRequest
-import logging
 from slugify import slugify
 
 from app.mod_adventure.models import Adventure
 from app.mod_auth.controllers import oauth
 from app.decorators import crossdomain
 
-mod_adventure = Blueprint('adventure', __name__, url_prefix='/api/v1/adventure')
+MOD_ADVENTURE = Blueprint('adventure', __name__, url_prefix='/api/v1/adventure')
 
 
-@mod_adventure.route('/', methods=['GET'])
+@MOD_ADVENTURE.route('/', methods=['GET'])
 @crossdomain(origin='*')
 def list_adventures():
     adventures = Adventure.objects()
@@ -26,7 +26,7 @@ def list_adventures():
     return jsonify(adventures=adventures_dict)
 
 
-@mod_adventure.route('/me', methods=['GET'])
+@MOD_ADVENTURE.route('/me', methods=['GET'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def list_user_adventures():
@@ -38,7 +38,7 @@ def list_user_adventures():
     return jsonify(adventures=adventures_dict)
 
 
-@mod_adventure.route('/<slug>', methods=['GET'])
+@MOD_ADVENTURE.route('/<slug>', methods=['GET'])
 @crossdomain(origin='*')
 def get_adventure(slug):
     try:
@@ -52,7 +52,7 @@ def get_adventure(slug):
     return
 
 
-@mod_adventure.route('/', methods=['POST'])
+@MOD_ADVENTURE.route('/', methods=['POST'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def add_adventure():
@@ -78,7 +78,7 @@ def add_adventure():
     return
 
 
-@mod_adventure.route('/<slug>', methods=['DELETE'])
+@MOD_ADVENTURE.route('/<slug>', methods=['DELETE'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def delete_point(slug):

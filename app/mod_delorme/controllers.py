@@ -3,17 +3,18 @@ controllers.py
 
 Delorme module controllers.
 """
-from flask import Response, Blueprint
 import json
 import urllib2
-from pykml import parser
 import logging
 from datetime import datetime
 import bson
-
+from pykml import parser
+from flask import Response, Blueprint, request, jsonify, abort
+from werkzeug.exceptions import BadRequest
 from app.mod_adventure.models import Adventure
 from app.mod_point.models import Point
-
+from app.mod_delorme.models import Delorme
+from app.decorators import crossdomain
 from app.mod_auth.controllers import oauth
 
 mod_delorme = Blueprint('delorme', __name__, url_prefix='/api/v1/delorme')
@@ -26,16 +27,16 @@ def load_data(url):
         try:
             point = None
             extended_data = placemark.ExtendedData.Data
-            pointid = None
+            delorme_id = None
             event = None
             elevation = None
             velocity = None
             course = None
             text = None
-            type='tracker'
+            point_type = 'tracker'
             for data in extended_data:
                 if data.attrib['name'] == 'Id':
-                    pointid = int(data.value.text)
+                    delorme_id = int(data.value.text)
                 elif data.attrib['name'] == 'Event':
                     event = data.value.text.encode('utf-8')
                 elif data.attrib['name'] == 'Elevation':
@@ -48,8 +49,8 @@ def load_data(url):
                     text = data.value.text
                     if text is not None:
                         text = text.encode('utf-8')
-            if pointid is not None:
-                point = Point.objects(pointid == pointid).first()
+            if delorme_id is not None:
+                point = Point.objects(delorme_id == delorme_id).first()
             if point is None:
                 title = event
                 coordinates = placemark.Point.coordinates.text.split(',')
@@ -59,7 +60,7 @@ def load_data(url):
 
                 if text is not None:
                     desc = text
-                    type = 'message'
+                    point_type = 'message'
                 else:
                     desc = ''
                     if elevation is not None:
@@ -73,9 +74,9 @@ def load_data(url):
                     title=title,
                     latitude=latitude,
                     longitude=longitude,
-                    type=type,
+                    point_type=point_type,
                     timestamp=timestamp,
-                    pointid=pointid,
+                    delorme_id=delorme_id,
                     desc=desc
                 )
                 point.save()
@@ -87,7 +88,7 @@ def load_data(url):
     return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
 
 
-@mod_delorme.route('/load/<adventure_slug>', methods=['GET'])
+@mod_delorme.route('/<adventure_slug>/load', methods=['GET'])
 @oauth.require_oauth('email')
 def load_tracker(adventure_slug):
     adventure = Adventure.objects().get(slug=adventure_slug)
@@ -95,4 +96,29 @@ def load_tracker(adventure_slug):
     if delorme is not None:
         return load_data(delorme.url)
     return Response(bson.json_util.dumps({'error': 'DeLorme tracker URL is not configured.'}), status=500, mimetype='application/json')
+
+
+@mod_delorme.route('/<adventure_slug>', methods=['POST'])
+@crossdomain(origin='*')
+@oauth.require_oauth('email')
+def add_tracker(adventure_slug):
+    try:
+        adventure = Adventure.objects.get(slug=adventure_slug)
+        url = request.values.get('url', None)
+        delorme = Delorme(
+            url=url
+        )
+        adventure.delorme = delorme
+        adventure.save()
+
+        return jsonify(adventure.to_mongo())
+    except TypeError as e:
+        logging.error(e)
+        abort(400)
+    except BadRequest:
+        abort(400)
+    except Exception as e:
+        logging.error(e)
+        abort(500)
+    return
 
