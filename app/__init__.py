@@ -7,12 +7,12 @@ from mongoengine import connect
 from flask import Flask, jsonify
 from app.mod_point.controllers import mod_point
 from app.mod_route.controllers import mod_route
-from app.mod_delorme.controllers import mod_delorme
+from app.mod_delorme.controllers import MOD_DELORME
 # from app.mod_spot.controllers import mod_spot
 # from app.mod_instagram.controllers import mod_instagram
 from app.mod_auth.controllers import mod_auth
 from app.mod_user.controllers import mod_user
-from app.mod_adventure.controllers import mod_adventure
+from app.mod_adventure.controllers import MOD_ADVENTURE
 from app.mod_user.models import User
 from app.mod_auth.controllers import oauth
 
@@ -47,9 +47,9 @@ def internal_error(e):
 # Registering module blueprints
 app.register_blueprint(mod_point)
 app.register_blueprint(mod_route)
-app.register_blueprint(mod_delorme)
+app.register_blueprint(MOD_DELORME)
 # app.register_blueprint(mod_spot)
 # app.register_blueprint(mod_instagram)
 app.register_blueprint(mod_auth)
 app.register_blueprint(mod_user)
-app.register_blueprint(mod_adventure)
+app.register_blueprint(MOD_ADVENTURE)

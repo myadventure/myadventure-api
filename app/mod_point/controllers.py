@@ -23,7 +23,7 @@ sbool = ignore_exception(TypeError)(bool)
 @mod_point.route('/<adventure_slug>/<point_type>', methods=['GET'])
 @crossdomain(origin='*')
 def list_point(adventure_slug, point_type):
-    points = Point.objects(adventure=adventure_slug, type=point_type)
+    points = Point.objects(adventure=adventure_slug, point_type=point_type)
     points_dict = []
     for point in points:
         points_dict.append(point.to_dict())

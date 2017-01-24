@@ -43,7 +43,7 @@ def list_user_adventures():
 def get_adventure(slug):
     try:
         adventure = Adventure.objects.get(slug=slug)
-        return jsonify(adventure.to_mongo())
+        return jsonify(adventure.to_dict())
     except DoesNotExist:
         abort(404)
     except Exception as e:

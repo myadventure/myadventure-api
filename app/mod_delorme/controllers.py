@@ -9,7 +9,7 @@ import logging
 from datetime import datetime
 import bson
 from pykml import parser
-from flask import Response, Blueprint, request, jsonify, abort
+from flask import Response, Blueprint, request, abort
 from werkzeug.exceptions import BadRequest
 from app.mod_adventure.models import Adventure
 from app.mod_point.models import Point
@@ -51,7 +51,7 @@ def load_data(url):
                     if text is not None:
                         text = text.encode('utf-8')
             if delorme_id is not None:
-                point = Point.objects(delorme_id == delorme_id).first()
+                point = Point.objects(delorme_id=delorme_id).first()
             if point is None:
                 title = event
                 coordinates = placemark.Point.coordinates.text.split(',')
@@ -111,10 +111,11 @@ def add_tracker(adventure_slug):
         delorme = Delorme(
             url=url
         )
+        delorme.save()
         adventure.delorme = delorme
         adventure.save()
 
-        return jsonify(adventure.to_mongo())
+        return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
     except TypeError as e:
         logging.error(e)
         abort(400)

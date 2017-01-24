@@ -27,6 +27,7 @@ class Adventure(Document):
     def to_dict(self):
         result = self.to_mongo().to_dict()
         result['_id'] = str(self.id)
+        result['delorme'] = str(self.delorme.id)
 
         return result
 
