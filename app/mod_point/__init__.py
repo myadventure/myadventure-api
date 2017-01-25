@@ -1,4 +1,0 @@
-"""
-Initialize point module
-
-"""

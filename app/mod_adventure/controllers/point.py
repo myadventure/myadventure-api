@@ -1,26 +1,25 @@
 """
-controllers.py
+Initialize adventure point controller
 
-Point module controllers.
 """
+
+import logging
+from datetime import datetime
 from flask import Blueprint, request, abort, jsonify
 from werkzeug.exceptions import BadRequest
-from datetime import datetime
-import logging
-
 from app.decorators import ignore_exception
-from app.mod_point.models import Point
+from app.mod_auth.models import Point
 from app.mod_auth.controllers import oauth
+from app.mod_adventure.controllers import MOD_ADVENTURE
 from app.decorators import crossdomain
 
-mod_point = Blueprint('point', __name__, url_prefix='/api/v1/point')
 
 sfloat = ignore_exception(TypeError)(float)
 sint = ignore_exception(TypeError)(int)
 sbool = ignore_exception(TypeError)(bool)
 
 
-@mod_point.route('/<adventure_slug>/<point_type>', methods=['GET'])
+@MOD_ADVENTURE.route('/<adventure_slug>/<point_type>', methods=['GET'])
 @crossdomain(origin='*')
 def list_point(adventure_slug, point_type):
     points = Point.objects(adventure=adventure_slug, point_type=point_type)
@@ -30,14 +29,14 @@ def list_point(adventure_slug, point_type):
     return jsonify(points=points_dict)
 
 
-@mod_point.route('/<point_id>', methods=['GET'])
+@MOD_ADVENTURE.route('/<point_id>', methods=['GET'])
 @crossdomain(origin='*')
 def get_point(point_id):
     point = Point.objects.get(id=point_id)
     return jsonify(point.to_dict())
 
 
-@mod_point.route('/<point_id>', methods=['PUT'])
+@MOD_ADVENTURE.route('/<point_id>', methods=['PUT'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def update_point(point_id):
@@ -53,7 +52,9 @@ def update_point(point_id):
             'set__thumb': request.values.get('thumb', None),
             'set__photo': request.values.get('photo', None),
             'set__video': request.values.get('video', None),
-            'set__timestamp': datetime.strptime(request.values.get('timestamp', datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z")), "%Y-%m-%dT%H:%M:%S.%fZ"),
+            'set__timestamp': datetime.strptime( \
+                request.values.get('timestamp', datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z") \
+            ), "%Y-%m-%dT%H:%M:%S.%fZ"),
             'set__hide': sbool(request.values.get('hide', None)),
             'set__delorme_id': sint(request.values.get('delorme_id', None))
         }
@@ -73,7 +74,7 @@ def update_point(point_id):
     return
 
 
-@mod_point.route('/<adventure_slug>/<point_type>', methods=['POST'])
+@MOD_ADVENTURE.route('/<adventure_slug>/<point_type>', methods=['POST'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def add_point(adventure_slug, point_type):
@@ -107,7 +108,7 @@ def add_point(adventure_slug, point_type):
     return
 
 
-@mod_point.route('/<point_id>', methods=['DELETE'])
+@MOD_ADVENTURE.route('/<point_id>', methods=['DELETE'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def delete_point(point_id):

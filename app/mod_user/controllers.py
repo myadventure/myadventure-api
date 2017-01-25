@@ -13,19 +13,23 @@ from werkzeug.security import gen_salt
 from app.mod_auth.controllers import oauth
 from app.mod_auth.models import Client
 from app.mod_user.models import User
+from app.mod_adventure.models import Adventure
+from app.decorators import crossdomain
 
-mod_user = Blueprint('user', __name__, url_prefix='/api/v1/user')
+MOD_USER = Blueprint('user', __name__, url_prefix='/api/v1/user')
 
 
-@mod_user.route('/', methods=['GET'])
+@MOD_USER.route('/', methods=['GET'])
 @oauth.require_oauth('email')
-def me():
+def get_current_user():
+    """Get current user."""
     user = request.oauth.user
     return jsonify(user=user.to_mongo())
 
 
-@mod_user.route('/', methods=['POST'])
+@MOD_USER.route('/', methods=['POST'])
 def add_user():
+    """Add new user."""
     try:
         email = request.form.get('email')
         password = request.form.get('password')
@@ -54,6 +58,16 @@ def add_user():
         return abort(400)
     except TypeError:
         return abort(400)
-    except Exception as e:
-        logging.error(e.args[0])
-        return abort(500)
+    return
+
+@MOD_USER.route('/adventure', methods=['GET'])
+@crossdomain(origin='*')
+@oauth.require_oauth('email')
+def list_user_adventures():
+    """Return user Adventures."""
+    user = request.oauth.user
+    adventures = Adventure.objects(users=user)
+    adventures_dict = []
+    for adventure in adventures:
+        adventures_dict.append(adventure.to_dict())
+    return jsonify(adventures=adventures_dict)

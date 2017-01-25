@@ -1,23 +1,21 @@
 """
-controllers.py
+Initialize adventure delorme controller
 
-Delorme module controllers.
 """
+
+import logging
 import json
 import urllib2
-import logging
-from datetime import datetime
-import bson
+import datetime
 from pykml import parser
-from flask import Response, Blueprint, request, abort
+from flask import abort, request, Response
 from werkzeug.exceptions import BadRequest
-from app.mod_adventure.models import Adventure
-from app.mod_point.models import Point
-from app.mod_delorme.models import Delorme
 from app.decorators import crossdomain
 from app.mod_auth.controllers import oauth
-
-MOD_DELORME = Blueprint('delorme', __name__, url_prefix='/api/v1/delorme')
+from app.mod_adventure.models.adventure import Adventure
+from app.mod_adventure.models.delorme import Delorme
+from app.mod_adventure.models.point import Point
+from app.mod_adventure.controllers import MOD_ADVENTURE
 
 
 def load_data(url):
@@ -87,42 +85,35 @@ def load_data(url):
     return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
 
 
-@MOD_DELORME.route('/<adventure_slug>/load', methods=['GET'])
-@oauth.require_oauth('email')
-def load_tracker(adventure_slug):
-    """Load DeLorme inReach tracker points from configured feed URL."""
-    adventure = Adventure.objects().get(slug=adventure_slug)
-    delorme = adventure.delorme
-    if delorme is not None:
-        return load_data(delorme.url)
-    return Response(bson.json_util.dumps( \
-        {'error': 'DeLorme tracker URL is not configured.'} \
-    ), status=500, mimetype='application/json')
-
-
-@MOD_DELORME.route('/<adventure_slug>', methods=['POST'])
+@MOD_ADVENTURE.route('/<slug>/delorme', methods=['POST'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
-def add_tracker(adventure_slug):
-    """Add tracker feed URL to Adventure object defined by adventure_slug"""
+def add_delorme(slug):
+    """Add Delorme inReach feed URL to Adventure object defined by slug"""
     try:
-        adventure = Adventure.objects.get(slug=adventure_slug)
-        url = request.values.get('url', None)
+        adventure = Adventure.objects.get(slug=slug)
+        feed_url = request.values.get('feed_url', None)
         delorme = Delorme(
-            url=url
+            feeed_url=feed_url
         )
-        delorme.save()
         adventure.delorme = delorme
         adventure.save()
 
         return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
-    except TypeError as e:
-        logging.error(e)
+    except TypeError as err:
+        logging.error(err)
         abort(400)
     except BadRequest:
         abort(400)
-    except Exception as e:
-        logging.error(e)
-        abort(500)
     return
 
+
+@MOD_ADVENTURE.route('/<slug>/delorme/load', methods=['GET'])
+@oauth.require_oauth('email')
+def load_tracker(slug):
+    """Load DeLorme inReach tracker points from configured feed URL."""
+    adventure = Adventure.objects().get(slug=slug)
+    delorme = adventure.delorme
+    if delorme is not None:
+        return load_data(delorme.url)
+    return Response(json.dumps({'status': 'ok'}), status=500, mimetype='application/json')

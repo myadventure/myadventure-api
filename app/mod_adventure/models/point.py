@@ -1,18 +1,20 @@
 """
-models.py
+Initialize adventure point model
 
-Point module MongoEngine models
 """
 
-from mongoengine import Document
+from mongoengine import EmbeddedDocument
 from mongoengine import fields
 
-from app.mod_adventure.models import Adventure
+class Point(EmbeddedDocument):
+    """A point.
 
-
-class Point(Document):
+    """
     title = fields.StringField()
     desc = fields.StringField()
+    elevation = fields.StringField()
+    speed = fields.StringField()
+    direction = fields.StringField()
     latitude = fields.FloatField()
     longitude = fields.FloatField()
     resource = fields.StringField()
@@ -23,11 +25,10 @@ class Point(Document):
     thumb = fields.StringField()
     photo = fields.StringField()
     video = fields.StringField()
-    adventure = fields.ReferenceField(Adventure)
 
     def to_dict(self):
         result = self.to_mongo().to_dict()
-        result['timestamp'] = self.timestamp.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-        result['_id'] = str(self.id)
+        result['timestamp'] = result['timestamp'].strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        del result['_id']
 
         return result

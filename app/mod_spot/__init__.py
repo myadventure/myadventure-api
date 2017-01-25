@@ -1,4 +1,0 @@
-"""
-Initialize spot module
-
-"""

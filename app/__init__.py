@@ -5,51 +5,46 @@ Initialize application
 import os
 from mongoengine import connect
 from flask import Flask, jsonify
-from app.mod_point.controllers import mod_point
-from app.mod_route.controllers import mod_route
-from app.mod_delorme.controllers import MOD_DELORME
-# from app.mod_spot.controllers import mod_spot
-# from app.mod_instagram.controllers import mod_instagram
 from app.mod_auth.controllers import mod_auth
-from app.mod_user.controllers import mod_user
+from app.mod_user.controllers import MOD_USER
 from app.mod_adventure.controllers import MOD_ADVENTURE
 from app.mod_user.models import User
 from app.mod_auth.controllers import oauth
 
-app = Flask(__name__, static_folder=os.getcwd() + '/app/static', static_url_path='', template_folder=os.getcwd() + '/app/templates')
-
-app.config.from_pyfile('config.py', silent=True)
-
-connect(
-    host=app.config['MONGODB_URI']
+APP = Flask(__name__, static_folder=os.getcwd() \
+    + '/app/static', static_url_path='', template_folder=os.getcwd() \
+    + '/app/templates' \
 )
 
-oauth.init_app(app)
+APP.config.from_pyfile('config.py', silent=True)
+
+connect(
+    host=APP.config['MONGODB_URI']
+)
+
+oauth.init_app(APP)
 
 
-@app.errorhandler(400)
-def bad_request(e):
+@APP.errorhandler(400)
+def bad_request():
     """Return a custom 400 error."""
-    return jsonify(error='The browser (or proxy) sent a request that this server could not understand.'), 400
+    return jsonify( \
+        error='The browser (or proxy) sent a request that this server could not understand.' \
+    ), 400
 
 
-@app.errorhandler(404)
-def page_not_found(e):
+@APP.errorhandler(404)
+def page_not_found():
     """Return a custom 404 error."""
     return jsonify(error='Sorry, Nothing at this URL.'), 404
 
 
-@app.errorhandler(500)
-def internal_error(e):
+@APP.errorhandler(500)
+def internal_error(err):
     """Return a custom 500 error."""
-    return jsonify(error='Sorry, unexpected error: {}'.format(e)), 500
+    return jsonify(error='Sorry, unexpected error: {}'.format(err)), 500
 
 # Registering module blueprints
-app.register_blueprint(mod_point)
-app.register_blueprint(mod_route)
-app.register_blueprint(MOD_DELORME)
-# app.register_blueprint(mod_spot)
-# app.register_blueprint(mod_instagram)
-app.register_blueprint(mod_auth)
-app.register_blueprint(mod_user)
-app.register_blueprint(MOD_ADVENTURE)
+APP.register_blueprint(mod_auth)
+APP.register_blueprint(MOD_USER)
+APP.register_blueprint(MOD_ADVENTURE)
