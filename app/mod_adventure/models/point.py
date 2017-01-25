@@ -27,8 +27,9 @@ class Point(EmbeddedDocument):
     video = fields.StringField()
 
     def to_dict(self):
+        """Convert object to dict."""
         result = self.to_mongo().to_dict()
-        result['timestamp'] = result['timestamp'].strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        result['timestamp'] = result['timestamp'].strftime("%Y-%m-%dT%H:%M:%SZ")
         del result['_id']
 
         return result

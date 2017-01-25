@@ -3,7 +3,7 @@ Initialize adventure route controller
 
 """
 
-import datetime
+from datetime import datetime
 import json
 import logging
 import urllib2
@@ -16,21 +16,18 @@ from app.mod_auth.controllers import oauth
 from app.decorators import crossdomain
 
 
-@MOD_ADVENTURE.route('/load', methods=['POST'])
+@MOD_ADVENTURE.route('/<slug>/route/load_from_url', methods=['POST'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def load_route():
-    try:
-        data = json.loads(request.data)
-        url = data['url']
-    except Exception as e:
-        logging.error(0)
-        abort(400)
+    """Load route from provided URL."""
+    data = json.loads(request.data)
+    url = data['url']
 
     obj = urllib2.urlopen(url)
-    str = obj.read()
+    res = obj.read()
     kml_str = ""
-    for line in iter(str.splitlines()):
+    for line in iter(res.splitlines()):
         if not 'atom:link' in line:
             kml_str += line
             kml_str += '\n'
@@ -53,19 +50,13 @@ def load_route():
             )
         except TypeError:
             abort(500)
-        except Exception as e:
-            logging.error(0)
-            abort(500)
         try:
             point.save()
         except TypeError:
             abort(400)
-        except BadRequest as e:
-            logging.error(e)
+        except BadRequest as err:
+            logging.error(err)
             abort(400)
-        except Exception as e:
-            logging.error(e)
-            abort(500)
 
         pointid += 1
 

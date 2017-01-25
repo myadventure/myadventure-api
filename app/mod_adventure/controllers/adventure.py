@@ -40,14 +40,16 @@ def get_adventure(slug):
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def add_adventure():
-    """Add Advebture."""
+    """Add Adventure."""
     try:
         name = request.values.get('name', None)
         user = request.oauth.user
         adventure = Adventure(
             slug=slugify(name),
             name=name,
-            users=[user]
+            users=[user],
+            delorme=None,
+            points=[]
         )
         adventure.save()
 

@@ -18,9 +18,9 @@ from app.mod_adventure.models.point import Point
 from app.mod_adventure.controllers import MOD_ADVENTURE
 
 
-def load_data(url):
+def load_data(feed_url, adventure):
     """Load DeLorme inReach data from specified feed URL."""
-    obj = urllib2.urlopen(url)
+    obj = urllib2.urlopen(feed_url)
     root = parser.parse(obj).getroot()
     for placemark in root.Document.Folder.Placemark:
         try:
@@ -49,7 +49,7 @@ def load_data(url):
                     if text is not None:
                         text = text.encode('utf-8')
             if delorme_id is not None:
-                point = Point.objects(delorme_id=delorme_id).first()
+                point = adventure.objects(delorme_id=delorme_id).first()
             if point is None:
                 title = event
                 coordinates = placemark.Point.coordinates.text.split(',')
@@ -60,25 +60,27 @@ def load_data(url):
                 if text is not None:
                     desc = text
                     point_type = 'message'
-                else:
-                    desc = ''
-                    if elevation is not None:
-                        desc = desc + "Elevation: {elevation}<br>".format(elevation=elevation)
-                    if velocity is not None:
-                        desc = desc + "Velocity: {velocity}<br>".format(velocity=velocity)
-                    if course is not None:
-                        desc = desc + "Course: {course}<br>".format(course=course)
 
                 point = Point(
                     title=title,
+                    desc=desc,
+                    elevation=elevation,
+                    speed=velocity,
+                    direction=course,
                     latitude=latitude,
                     longitude=longitude,
+                    resource=None,
                     point_type=point_type,
                     timestamp=timestamp,
                     delorme_id=delorme_id,
-                    desc=desc
+                    hide=False,
+                    thumb=None,
+                    photo=None,
+                    video=None
                 )
-                point.save()
+
+                adventure.points.append(point)
+                adventure.save()
         except AttributeError:
             pass
 
@@ -93,10 +95,9 @@ def add_delorme(slug):
     try:
         adventure = Adventure.objects.get(slug=slug)
         feed_url = request.values.get('feed_url', None)
-        delorme = Delorme(
+        adventure.delorme = Delorme(
             feeed_url=feed_url
         )
-        adventure.delorme = delorme
         adventure.save()
 
         return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
@@ -114,6 +115,8 @@ def load_tracker(slug):
     """Load DeLorme inReach tracker points from configured feed URL."""
     adventure = Adventure.objects().get(slug=slug)
     delorme = adventure.delorme
-    if delorme is not None:
-        return load_data(delorme.url)
-    return Response(json.dumps({'status': 'ok'}), status=500, mimetype='application/json')
+    if delorme.feed_url is not None:
+        return load_data(delorme.feed_url, adventure)
+    return Response(json.dumps( \
+        {'error': 'DeLorme inReach Feed URL not found.'} \
+    ), status=500, mimetype='application/json')

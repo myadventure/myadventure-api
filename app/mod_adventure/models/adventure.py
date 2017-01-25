@@ -5,6 +5,9 @@ Initialize adventure model
 
 from mongoengine import Document
 from mongoengine import fields
+from app.mod_adventure.models.delorme import Delorme
+from app.mod_adventure.models.point import Point
+from app.mod_user.models import User
 
 class Adventure(Document):
     """An adventure.

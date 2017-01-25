@@ -1,10 +1,15 @@
+"""
+Start development web server.
+
+"""
+
 import sys
-from app import app
+from app import APP
 
 
 def main(argv):
-    app.run(host=app.config['HOST'], port=app.config['PORT'])
-    pass
+    """Start development web server."""
+    APP.run(host=APP.config['HOST'], port=APP.config['PORT'])
 
 if __name__ == "__main__":
     main(sys.argv)

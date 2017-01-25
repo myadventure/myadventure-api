@@ -3,6 +3,7 @@ Initialize application
 
 """
 import os
+import logging
 from mongoengine import connect
 from flask import Flask, jsonify
 from app.mod_auth.controllers import mod_auth
@@ -26,16 +27,18 @@ oauth.init_app(APP)
 
 
 @APP.errorhandler(400)
-def bad_request():
+def bad_request(err):
     """Return a custom 400 error."""
+    logging.error(err)
     return jsonify( \
         error='The browser (or proxy) sent a request that this server could not understand.' \
     ), 400
 
 
 @APP.errorhandler(404)
-def page_not_found():
+def page_not_found(err):
     """Return a custom 404 error."""
+    logging.error(err)
     return jsonify(error='Sorry, Nothing at this URL.'), 404
 
 
