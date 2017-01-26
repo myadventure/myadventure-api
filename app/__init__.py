@@ -12,7 +12,6 @@ from app.views.user import MOD_USER
 from .views.adventure import MOD_ADVENTURE
 from .views.delorme import MOD_DELORME
 from .views.point import MOD_POINT
-from .views.route import MOD_ROUTE
 
 APP = Flask(__name__, static_folder=os.getcwd() \
     + '/app/static', static_url_path='', template_folder=os.getcwd() \
@@ -55,4 +54,3 @@ APP.register_blueprint(MOD_USER)
 APP.register_blueprint(MOD_ADVENTURE)
 APP.register_blueprint(MOD_DELORME)
 APP.register_blueprint(MOD_POINT)
-APP.register_blueprint(MOD_ROUTE)
