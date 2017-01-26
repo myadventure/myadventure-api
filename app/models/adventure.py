@@ -1,13 +1,14 @@
 """
-Initialize adventure model
+Adventure model
 
 """
 
 from mongoengine import Document
 from mongoengine import fields
-from app.mod_adventure.models.delorme import Delorme
-from app.mod_adventure.models.point import Point
 from app.mod_user.models import User
+from .delorme import Delorme
+from .point import Point
+
 
 class Adventure(Document):
     """An adventure.
@@ -29,7 +30,9 @@ class Adventure(Document):
     def to_dict(self):
         """Convert object to dict."""
         result = self.to_mongo().to_dict()
-        del result['points']
-        del result['_id']
+        if 'points' in result.keys():
+            del result['points']
+        if 'delorme' in result.keys():
+            del result['delorme']
 
         return result

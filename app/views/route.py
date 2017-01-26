@@ -7,16 +7,16 @@ from datetime import datetime
 import json
 import logging
 import urllib2
-from flask import abort, request, Response
+from flask import Blueprint, abort, request, Response
 from werkzeug.exceptions import BadRequest
 from pykml import parser
-from app.mod_adventure.controllers import MOD_ADVENTURE
-from app.mod_adventure.models.point import Point
+from app.models.point import Point
 from app.mod_auth.controllers import oauth
 from app.decorators import crossdomain
 
+MOD_ROUTE = Blueprint('route', __name__, url_prefix='/api/v1/adventure/<slug>/route')
 
-@MOD_ADVENTURE.route('/<slug>/route/load_from_url', methods=['POST'])
+@MOD_ROUTE.route('/load_from_url', methods=['POST'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def load_route():

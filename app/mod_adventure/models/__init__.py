@@ -1,4 +1,0 @@
-"""
-Initialize adventure module models
-
-"""

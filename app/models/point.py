@@ -1,5 +1,5 @@
 """
-Initialize adventure point model
+Point model
 
 """
 
@@ -10,6 +10,7 @@ class Point(EmbeddedDocument):
     """A point.
 
     """
+    point_id = fields.SequenceField()
     title = fields.StringField()
     desc = fields.StringField()
     elevation = fields.StringField()
@@ -29,7 +30,6 @@ class Point(EmbeddedDocument):
     def to_dict(self):
         """Convert object to dict."""
         result = self.to_mongo().to_dict()
-        result['timestamp'] = result['timestamp'].strftime("%Y-%m-%dT%H:%M:%SZ")
-        del result['_id']
+        result['timestamp'] = result['timestamp'].strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
         return result

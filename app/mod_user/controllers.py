@@ -13,7 +13,7 @@ from werkzeug.security import gen_salt
 from app.mod_auth.controllers import oauth
 from app.mod_auth.models import Client
 from app.mod_user.models import User
-from app.mod_adventure.models.adventure import Adventure
+from app.models.adventure import Adventure
 from app.decorators import crossdomain
 
 MOD_USER = Blueprint('user', __name__, url_prefix='/api/v1/user')

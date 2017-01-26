@@ -8,14 +8,15 @@ import json
 import urllib2
 import datetime
 from pykml import parser
-from flask import abort, request, Response
+from flask import Blueprint, abort, request, Response
 from werkzeug.exceptions import BadRequest
 from app.decorators import crossdomain
 from app.mod_auth.controllers import oauth
-from app.mod_adventure.models.adventure import Adventure
-from app.mod_adventure.models.delorme import Delorme
-from app.mod_adventure.models.point import Point
-from app.mod_adventure.controllers import MOD_ADVENTURE
+from app.models.adventure import Adventure
+from app.models.delorme import Delorme
+from app.models.point import Point
+
+MOD_DELORME = Blueprint('delorme', __name__, url_prefix='/api/v1/adventure/<slug>/delorme')
 
 
 def load_data(feed_url, adventure):
@@ -87,7 +88,7 @@ def load_data(feed_url, adventure):
     return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
 
 
-@MOD_ADVENTURE.route('/<slug>/delorme', methods=['POST'])
+@MOD_DELORME.route('/', methods=['POST'])
 @crossdomain(origin='*')
 @oauth.require_oauth('email')
 def add_delorme(slug):
@@ -109,7 +110,7 @@ def add_delorme(slug):
     return
 
 
-@MOD_ADVENTURE.route('/<slug>/delorme/load', methods=['GET'])
+@MOD_DELORME.route('/load', methods=['GET'])
 @oauth.require_oauth('email')
 def load_tracker(slug):
     """Load DeLorme inReach tracker points from configured feed URL."""

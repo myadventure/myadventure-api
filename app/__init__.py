@@ -8,9 +8,11 @@ from mongoengine import connect
 from flask import Flask, jsonify
 from app.mod_auth.controllers import mod_auth
 from app.mod_user.controllers import MOD_USER
-from app.mod_adventure.controllers import MOD_ADVENTURE
-from app.mod_user.models import User
 from app.mod_auth.controllers import oauth
+from .views.adventure import MOD_ADVENTURE
+from .views.delorme import MOD_DELORME
+from .views.point import MOD_POINT
+from .views.route import MOD_ROUTE
 
 APP = Flask(__name__, static_folder=os.getcwd() \
     + '/app/static', static_url_path='', template_folder=os.getcwd() \
@@ -51,3 +53,6 @@ def internal_error(err):
 APP.register_blueprint(mod_auth)
 APP.register_blueprint(MOD_USER)
 APP.register_blueprint(MOD_ADVENTURE)
+APP.register_blueprint(MOD_DELORME)
+APP.register_blueprint(MOD_POINT)
+APP.register_blueprint(MOD_ROUTE)

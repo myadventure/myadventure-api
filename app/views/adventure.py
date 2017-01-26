@@ -1,26 +1,31 @@
 """
-Initialize adventure controller
+Adventure view
 
 """
 
 import logging
-from flask import jsonify, abort, request
+from flask import Blueprint, jsonify, abort, request
 from mongoengine import DoesNotExist
 from werkzeug.exceptions import BadRequest
 from slugify import slugify
 from app.decorators import crossdomain
 from app.mod_auth.controllers import oauth
-from app.mod_adventure.models.adventure import Adventure
-from app.mod_adventure.controllers import MOD_ADVENTURE
+from app.models.adventure import Adventure
+
+MOD_ADVENTURE = Blueprint('adventure', __name__, url_prefix='/api/v1/adventure')
 
 @MOD_ADVENTURE.route('/', methods=['GET'])
 @crossdomain(origin='*')
 def list_adventures():
     """List all Adventures."""
-    adventures = Adventure.objects()
     adventures_dict = []
-    for adventure in adventures:
-        adventures_dict.append(adventure.to_dict())
+    try:
+        adventures = Adventure.objects()
+        for adventure in adventures:
+            adventures_dict.append(adventure.to_dict())
+    except DoesNotExist as err:
+        logging.info(err)
+
     return jsonify(adventures=adventures_dict)
 
 
@@ -53,7 +58,7 @@ def add_adventure():
         )
         adventure.save()
 
-        return jsonify(adventure.to_mongo())
+        return jsonify(adventure.to_dict())
     except TypeError as err:
         logging.error(err)
         abort(400)
@@ -70,7 +75,7 @@ def delete_point(slug):
     adventure = Adventure.objects.get(slug=slug)
     try:
         adventure.delete()
-        return jsonify(adventure.to_mongo())
+        return jsonify({'status': 'ok'})
     except DoesNotExist:
         abort(404)
     return

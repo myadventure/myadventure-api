@@ -1,5 +1,5 @@
 """
-Initialize adventure delorme model
+DeLorme model
 
 """
 
