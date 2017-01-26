@@ -84,8 +84,6 @@ def load_data(feed_url, adventure):
                     video=None
                 )
 
-                print point
-
                 adventure.points.append(point)
                 adventure.save()
         except AttributeError as err:
