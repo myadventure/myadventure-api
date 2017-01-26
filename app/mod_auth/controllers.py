@@ -9,7 +9,7 @@ from flask import Blueprint, request, render_template, abort, redirect, url_for,
 from flask_login import current_user, login_user, LoginManager, login_required, logout_user
 from flask_oauthlib.provider import OAuth2Provider
 
-from app.mod_user.models import User
+from app.models.user import User
 from app.mod_auth.forms import LoginForm
 from app.mod_auth.models import Client
 
@@ -33,8 +33,8 @@ def on_load(state):
 
 
 @login_manager.user_loader
-def user_loader(id):
-    user = User.objects.get(id=id)
+def user_loader(user_id):
+    user = User.objects.get(user_id=user_id)
     return user
 
 

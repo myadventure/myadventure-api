@@ -8,13 +8,13 @@ import re
 from datetime import datetime, timedelta
 
 from flask_login import current_user
-from flask.ext.oauthlib.provider import OAuth2RequestValidator
-from flask.ext.oauthlib.utils import decode_base64
+from flask_oauthlib.provider import OAuth2RequestValidator
+from flask_oauthlib.utils import decode_base64
 from mongoengine import DoesNotExist
 from oauthlib.common import to_unicode
 
-from app.mod_user.models import User
-from app.mod_facebook.models import Facebook
+from app.models.user import User
+from app.models.facebook import Facebook
 from models import Client, Grant, Token
 
 
@@ -82,14 +82,14 @@ def load_grant(client_id, code, *args, **kwargs):
 
 def save_grant(client_id, code, request, *args, **kwargs):
     expires = datetime.utcnow() + timedelta(seconds=3600)
-    user = User.objects.get(id=current_user.id)
+    user = User.objects.get(user_id=current_user.user_id)
     grant = Grant(
         client_id=client_id,
         code=code['code'],
         redirect_uri=request.redirect_uri,
         _scopes=' '.join(request.scopes),
         user=user,
-        user_id=user.id,
+        user_id=user.user_id,
         expires=expires
     )
     grant.save()
@@ -114,7 +114,7 @@ def save_token(token, request, *args, **kwargs):
     user = request.user
     toks = Token.objects(
         client_id=request.client.client_id,
-        user_id=user.id
+        user_id=user.user_id
     )
     # make sure that every client has only one token connected to a user
     for t in toks:
@@ -130,7 +130,7 @@ def save_token(token, request, *args, **kwargs):
         _scopes=token['scope'],
         expires=expires,
         client_id=request.client.client_id,
-        user_id=user.id,
+        user_id=user.user_id,
         user=user
     )
     tok.save()

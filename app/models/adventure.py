@@ -5,7 +5,7 @@ Adventure model
 
 from mongoengine import Document
 from mongoengine import fields
-from app.mod_user.models import User
+from app.models.user import User
 from .delorme import Delorme
 from .point import Point
 

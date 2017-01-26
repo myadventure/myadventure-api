@@ -7,8 +7,8 @@ import logging
 from mongoengine import connect
 from flask import Flask, jsonify
 from app.mod_auth.controllers import mod_auth
-from app.mod_user.controllers import MOD_USER
 from app.mod_auth.controllers import oauth
+from app.views.user import MOD_USER
 from .views.adventure import MOD_ADVENTURE
 from .views.delorme import MOD_DELORME
 from .views.point import MOD_POINT

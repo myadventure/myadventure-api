@@ -5,14 +5,12 @@ User module controllers.
 """
 import hashlib
 import logging
-
 from flask import Blueprint, request, jsonify, abort
 from mongoengine import NotUniqueError, DoesNotExist
 from werkzeug.security import gen_salt
-
 from app.mod_auth.controllers import oauth
 from app.mod_auth.models import Client
-from app.mod_user.models import User
+from app.models.user import User
 from app.models.adventure import Adventure
 from app.decorators import crossdomain
 

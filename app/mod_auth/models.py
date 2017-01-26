@@ -8,7 +8,7 @@ from mongoengine import Document
 from mongoengine import fields
 from werkzeug.security import gen_salt
 
-from app.mod_user.models import User
+from app.models.user import User
 
 
 class Client(Document):
@@ -72,7 +72,7 @@ class Client(Document):
 
 
 class Grant(Document):
-    id = fields.SequenceField(primary_key=True)
+    grant_id = fields.SequenceField(primary_key=True)
 
     user_id = fields.IntField(null=False)
     user = fields.ReferenceField(User)
@@ -95,7 +95,7 @@ class Grant(Document):
 
 
 class Token(Document):
-    id = fields.SequenceField(primary_key=True)
+    token_id = fields.SequenceField(primary_key=True)
 
     user_id = fields.IntField(null=False)
     user = fields.ReferenceField(User)
