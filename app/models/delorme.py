@@ -11,3 +11,9 @@ class Delorme(EmbeddedDocument):
 
     """
     feed_url = fields.StringField()
+
+    def to_dict(self):
+        """Convert object to dict."""
+        result = self.to_mongo().to_dict()
+
+        return result
