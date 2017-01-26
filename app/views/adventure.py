@@ -9,7 +9,7 @@ from mongoengine import DoesNotExist
 from werkzeug.exceptions import BadRequest
 from slugify import slugify
 from app.decorators import crossdomain
-from app.mod_auth.controllers import oauth
+from app.views.auth import OAUTH
 from app.models.adventure import Adventure
 
 MOD_ADVENTURE = Blueprint('adventure', __name__, url_prefix='/api/v1/adventure')
@@ -43,7 +43,7 @@ def get_adventure(slug):
 
 @MOD_ADVENTURE.route('/', methods=['POST'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def add_adventure():
     """Add Adventure."""
     try:
@@ -69,7 +69,7 @@ def add_adventure():
 
 @MOD_ADVENTURE.route('/<slug>', methods=['DELETE'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def delete_point(slug):
     """Delete Adventure."""
     adventure = Adventure.objects.get(slug=slug)

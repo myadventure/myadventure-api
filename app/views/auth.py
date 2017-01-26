@@ -1,44 +1,40 @@
 """
-controllers.py
+auth.py
 
 Auth module controllers.
 """
 import urllib
-
 from flask import Blueprint, request, render_template, abort, redirect, url_for, jsonify
 from flask_login import current_user, login_user, LoginManager, login_required, logout_user
 from flask_oauthlib.provider import OAuth2Provider
-
+from app.forms import LoginForm
 from app.models.user import User
-from app.mod_auth.forms import LoginForm
-from app.mod_auth.models import Client
+from app.models.auth import Client
+from app.validators import RequestValidator
 
-from validators import RequestValidator
+OAUTH = OAuth2Provider()
+OAUTH._validator = RequestValidator()
 
-oauth = OAuth2Provider()
-oauth._validator = RequestValidator()
+MOD_AUTH = Blueprint('auth', __name__, url_prefix='')
 
-mod_auth = Blueprint('auth', __name__, url_prefix='')
-
-login_manager = LoginManager()
-
+LOGIN_MANAGER = LoginManager()
 
 def next_is_valid(next):
     return True
 
 
-@mod_auth.record_once
+@MOD_AUTH.record_once
 def on_load(state):
-    login_manager.init_app(state.app)
+    LOGIN_MANAGER.init_app(state.app)
 
 
-@login_manager.user_loader
+@LOGIN_MANAGER.user_loader
 def user_loader(user_id):
     user = User.objects.get(user_id=user_id)
     return user
 
 
-@mod_auth.route('/login', methods=['GET', 'POST'])
+@MOD_AUTH.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if request.method == 'POST':
@@ -67,7 +63,7 @@ def login():
     return render_template('login.html', form=form, values=request.args)
 
 
-@mod_auth.route("/logout")
+@MOD_AUTH.route("/logout")
 @login_required
 def logout():
     logout_user()
@@ -75,21 +71,21 @@ def logout():
     return redirect(next or jsonify({"status": "ok"}))
 
 
-@mod_auth.route('/oauth/token', methods=['POST'])
-@oauth.token_handler
+@MOD_AUTH.route('/oauth/token', methods=['POST'])
+@OAUTH.token_handler
 def access_token():
     return None
 
 
-@mod_auth.route('/oauth/revoke', methods=['POST'])
-@oauth.revoke_handler
+@MOD_AUTH.route('/oauth/revoke', methods=['POST'])
+@OAUTH.revoke_handler
 def revoke_token():
     """ This endpoint allows a user to revoke their access token."""
     pass
 
 
-@mod_auth.route('/oauth/authorize', methods=['GET', 'POST'])
-@oauth.authorize_handler
+@MOD_AUTH.route('/oauth/authorize', methods=['GET', 'POST'])
+@OAUTH.authorize_handler
 def authorize(*args, **kwargs):
     if current_user.is_anonymous:
         values = kwargs
@@ -106,6 +102,3 @@ def authorize(*args, **kwargs):
 
     confirm = request.form.get('confirm', 'no')
     return confirm == 'yes'
-
-
-

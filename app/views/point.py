@@ -9,7 +9,7 @@ from flask import Blueprint, request, abort, jsonify
 from werkzeug.exceptions import BadRequest
 from mongoengine.queryset.visitor import Q
 from app.decorators import ignore_exception
-from app.mod_auth.controllers import oauth
+from app.views.auth import OAUTH
 from app.models.adventure import Adventure
 from app.models.point import Point
 from app.decorators import crossdomain
@@ -49,7 +49,7 @@ def get_point(slug, point_type, point_id):
 
 @MOD_POINT.route('/<point_id>', methods=['PUT'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def update_point(slug, point_type, point_id):
     """Update specific point by id."""
     timestamp = None
@@ -97,7 +97,7 @@ def update_point(slug, point_type, point_id):
 
 @MOD_POINT.route('/', methods=['POST'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def add_point(slug, point_type):
     """Add new point to adventure."""
     timestamp = None
@@ -139,7 +139,7 @@ def add_point(slug, point_type):
 
 @MOD_POINT.route('/<point_id>', methods=['DELETE'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def delete_point(slug, point_type, point_id):
     """Delete specific point by id."""
     try:

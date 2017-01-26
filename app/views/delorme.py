@@ -10,7 +10,7 @@ from pykml import parser
 from flask import Blueprint, abort, request, jsonify
 from werkzeug.exceptions import BadRequest
 from app.decorators import crossdomain
-from app.mod_auth.controllers import oauth
+from app.views.auth import OAUTH
 from app.models.adventure import Adventure
 from app.models.delorme import Delorme
 from app.models.point import Point
@@ -98,7 +98,7 @@ def load_data(feed_url, adventure):
 
 @MOD_DELORME.route('/', methods=['POST'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def add_delorme(slug):
     """Add Delorme inReach feed URL to Adventure object defined by slug"""
     try:
@@ -120,7 +120,7 @@ def add_delorme(slug):
 
 @MOD_DELORME.route('/', methods=['GET'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def get_delorme(slug):
     """Get Delorme inReach information."""
     try:
@@ -138,7 +138,7 @@ def get_delorme(slug):
 
 @MOD_DELORME.route('/', methods=['DELETE'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def delete_point(slug):
     """Delete DeLorme inReach information."""
     Adventure.objects(slug=slug).update(unset__delorme=1, upsert=True)
@@ -146,7 +146,7 @@ def delete_point(slug):
 
 
 @MOD_DELORME.route('/load', methods=['GET'])
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def load_tracker(slug):
     """Load DeLorme inReach tracker points from configured feed URL."""
     adventure = Adventure.objects(slug=slug).get()
