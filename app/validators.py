@@ -78,7 +78,7 @@ def load_grant(client_id, code, *args, **kwargs):
 
 
 def save_grant(client_id, code, request, *args, **kwargs):
-    expires = datetime.utcnow() + timedelta(seconds=3600)
+    expires = datetime.utcnow() + timedelta(months=12)
     user = User.objects.get(user_id=current_user.user_id)
     grant = Grant(
         client_id=client_id,
