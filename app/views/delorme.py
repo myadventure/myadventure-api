@@ -74,6 +74,7 @@ def load_data(feed_url, adventure):
                     point_type=point_type,
                     timestamp=timestamp,
                     delorme_id=delorme_id,
+                    aio_id=None,
                     hide=False,
                     thumb=None,
                     photo=None,
