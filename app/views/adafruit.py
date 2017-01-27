@@ -40,8 +40,8 @@ def load_data(base_url, username, feed, aio_key, adventure):
         aio_id = point[u'id']
         timestamp = datetime.strptime(point[u'created_at'], "%Y-%m-%dT%H:%M:%S.%fZ")
         location = point[u'location']
-        latitude = float(location[u'geometry'][u'coordinates'][0])
-        longitude = float(location[u'geometry'][u'coordinates'][1])
+        longitude = float(location[u'geometry'][u'coordinates'][0])
+        latitude = float(location[u'geometry'][u'coordinates'][1])
         altitude = str(location[u'geometry'][u'coordinates'][2])
         speed = str(point[u'value'])
 
