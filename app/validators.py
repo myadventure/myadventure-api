@@ -1,7 +1,7 @@
 """
 validators.py
 
-Auth module validators
+App validators.
 """
 import logging
 import re
@@ -15,7 +15,7 @@ from oauthlib.common import to_unicode
 
 from app.models.user import User
 from app.models.facebook import Facebook
-from models import Client, Grant, Token
+from app.models.auth import Client, Grant, Token
 
 
 def load_client(client_id):
@@ -48,9 +48,6 @@ def load_user(username, password, client, request, *args, **kwargs):
             me = facebook.get('/me', params={'fields': 'id,name,email,link'})
         except client.OAuthException:
             return None
-        except Exception as e:
-            logging.error(e)
-            return None
 
         try:
             user = User.objects.get(facebook_id=username)
@@ -81,7 +78,7 @@ def load_grant(client_id, code, *args, **kwargs):
 
 
 def save_grant(client_id, code, request, *args, **kwargs):
-    expires = datetime.utcnow() + timedelta(seconds=3600)
+    expires = datetime.utcnow() + timedelta(months=12)
     user = User.objects.get(user_id=current_user.user_id)
     grant = Grant(
         client_id=client_id,

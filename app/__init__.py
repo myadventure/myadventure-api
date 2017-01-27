@@ -6,13 +6,12 @@ import os
 import logging
 from mongoengine import connect
 from flask import Flask, jsonify
-from app.mod_auth.controllers import mod_auth
-from app.mod_auth.controllers import oauth
+from app.views.auth import MOD_AUTH
+from app.views.auth import OAUTH
 from app.views.user import MOD_USER
 from .views.adventure import MOD_ADVENTURE
 from .views.delorme import MOD_DELORME
 from .views.point import MOD_POINT
-from .views.route import MOD_ROUTE
 
 APP = Flask(__name__, static_folder=os.getcwd() \
     + '/app/static', static_url_path='', template_folder=os.getcwd() \
@@ -25,7 +24,7 @@ connect(
     host=APP.config['MONGODB_URI']
 )
 
-oauth.init_app(APP)
+OAUTH.init_app(APP)
 
 
 @APP.errorhandler(400)
@@ -50,9 +49,8 @@ def internal_error(err):
     return jsonify(error='Sorry, unexpected error: {}'.format(err)), 500
 
 # Registering module blueprints
-APP.register_blueprint(mod_auth)
+APP.register_blueprint(MOD_AUTH)
 APP.register_blueprint(MOD_USER)
 APP.register_blueprint(MOD_ADVENTURE)
 APP.register_blueprint(MOD_DELORME)
 APP.register_blueprint(MOD_POINT)
-APP.register_blueprint(MOD_ROUTE)

@@ -1,10 +1,10 @@
 """
 models.py
 
-User module MongoEngine models
+User mongoengine models..
 """
-import hashlib
 
+import hashlib
 from mongoengine import Document
 from mongoengine import fields
 

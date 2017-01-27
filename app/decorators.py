@@ -18,7 +18,7 @@ def crossdomain(origin=None, methods=None, headers=None,
     if not isinstance(origin, basestring):
         origin = ', '.join(origin)
     if isinstance(max_age, timedelta):
-        max_age = max_age.total_seconds()
+        max_age = timedelta(max_age).total_seconds()
 
     def get_methods():
         if methods is not None:
@@ -50,9 +50,11 @@ def crossdomain(origin=None, methods=None, headers=None,
     return decorator
 
 
-def ignore_exception(exception=Exception, default=None):  # http://stackoverflow.com/questions/2262333/is-there-a-built-in-or-more-pythonic-way-to-try-to-parse-a-string-to-an-integer
+def ignore_exception(exception=Exception, default=None):
     """Returns a decorator that ignores an exception raised by the function it
     decorates.
+
+    http://stackoverflow.com/questions/2262333/is-there-a-built-in-or-more-pythonic-way-to-try-to-parse-a-string-to-an-integer
 
     :param Exception exception: exception type to catch
     :param Object default: default value

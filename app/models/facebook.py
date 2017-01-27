@@ -1,25 +1,29 @@
 """
-models.py
+facebook.py
 
-Facebook module models.
+Facebook models.
 """
+
 import requests
 from flask import abort
 
 
-class Facebook:
+class Facebook(object):
+    """A platform user.
+
+    """
     def __init__(self, token):
         self.token = token
-        pass
 
     def get(self, path, params=None):
+        """Get request to Facebook."""
         request_params = {
             'access_token': self.token,
             'format': 'json',
             'metho': 'get'
         }
         request_params.update(params)
-        r = requests.get('https://graph.facebook.com/v2.5' + path, params=request_params)
-        if r.status_code != 200:
-            abort(r.status_code)
-        return r.json()
+        res = requests.get('https://graph.facebook.com/v2.5' + path, params=request_params)
+        if res.status_code != 200:
+            abort(res.status_code)
+        return res.json()

@@ -1,7 +1,7 @@
 """
-models.py
+auth.py
 
-Auth module MongoEngine models
+Auth mongoengine models.
 """
 
 from mongoengine import Document
@@ -12,6 +12,7 @@ from app.models.user import User
 
 
 class Client(Document):
+    """Auth Client model."""
     user_id = fields.IntField(null=False)
     user = fields.ReferenceField(User)
 
@@ -25,42 +26,48 @@ class Client(Document):
 
     @property
     def allowed_grant_types(self):
-        """ Returns allowed grant types."""
+        """Returns allowed grant types."""
         return ['password', 'authorization_code']
 
     @property
     def client_type(self):
+        """Returns client type."""
         if self.is_confidential:
             return 'confidential'
         return 'public'
 
     @property
     def redirect_uris(self):
+        """Returns a list of redirect URIs."""
         if self._redirect_uris:
-            return self._redirect_uris.split()
+            return str(self._redirect_uris).split()
         return []
 
     @property
     def default_redirect_uri(self):
+        """Returns the default redirect URI."""
         return self.redirect_uris[0]
 
     @property
     def default_scopes(self):
+        """Returns the client scopes."""
         if self._default_scopes:
-            return self._default_scopes.split()
+            return str(self._default_scopes).split()
         return []
 
     @property
     def has_password_credential_permission(self):
+        """Returns true if the client has password permission."""
         return True
 
     @property
     def has_facebook_credential_permission(self):
+        """Returns true if the client has facebook permission."""
         return True
 
     @staticmethod
     def generate(redirect_uris):
-
+        """Generates a new client."""
         item = Client(
             client_id=gen_salt(40),
             client_secret=gen_salt(50),
@@ -72,6 +79,7 @@ class Client(Document):
 
 
 class Grant(Document):
+    """Auth Grant model."""
     grant_id = fields.SequenceField(primary_key=True)
 
     user_id = fields.IntField(null=False)
@@ -89,12 +97,14 @@ class Grant(Document):
 
     @property
     def scopes(self):
+        """Returns the grant scopes."""
         if self._scopes:
-            return self._scopes.split()
+            return str(self._scopes).split()
         return []
 
 
 class Token(Document):
+    """Client token model."""
     token_id = fields.SequenceField(primary_key=True)
 
     user_id = fields.IntField(null=False)
@@ -113,6 +123,7 @@ class Token(Document):
 
     @property
     def scopes(self):
+        """Returns the token scopes."""
         if self._scopes:
-            return self._scopes.split()
+            return str(self._scopes).split()
         return []

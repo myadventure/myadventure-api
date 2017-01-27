@@ -4,14 +4,13 @@ Initialize adventure delorme controller
 """
 
 import logging
-import json
 import urllib2
 import datetime
 from pykml import parser
-from flask import Blueprint, abort, request, Response
+from flask import Blueprint, abort, request, jsonify
 from werkzeug.exceptions import BadRequest
 from app.decorators import crossdomain
-from app.mod_auth.controllers import oauth
+from app.views.auth import OAUTH
 from app.models.adventure import Adventure
 from app.models.delorme import Delorme
 from app.models.point import Point
@@ -33,6 +32,7 @@ def load_data(feed_url, adventure):
             velocity = None
             course = None
             text = None
+            desc = None
             point_type = 'tracker'
             for data in extended_data:
                 if data.attrib['name'] == 'Id':
@@ -50,13 +50,17 @@ def load_data(feed_url, adventure):
                     if text is not None:
                         text = text.encode('utf-8')
             if delorme_id is not None:
-                point = adventure.objects(delorme_id=delorme_id).first()
+                point = adventure.points.filter( \
+                    point_type=point_type, delorme_id=delorme_id \
+                ).first()
             if point is None:
                 title = event
                 coordinates = placemark.Point.coordinates.text.split(',')
                 latitude = float(coordinates[1])
                 longitude = float(coordinates[0])
-                timestamp = datetime.strptime(placemark.TimeStamp.when.text, "%Y-%m-%dT%H:%M:%SZ")
+                timestamp = datetime.datetime.strptime( \
+                    placemark.TimeStamp.when.text, "%Y-%m-%dT%H:%M:%SZ" \
+                )
 
                 if text is not None:
                     desc = text
@@ -83,26 +87,28 @@ def load_data(feed_url, adventure):
 
                 adventure.points.append(point)
                 adventure.save()
-        except AttributeError:
-            pass
+        except AttributeError as err:
+            if 'no such child' not in err.message:
+                logging.error(err)
+                return abort(500)
 
-    return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
+    return jsonify({'status': 'ok'})
 
 
 @MOD_DELORME.route('/', methods=['POST'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def add_delorme(slug):
     """Add Delorme inReach feed URL to Adventure object defined by slug"""
     try:
         adventure = Adventure.objects.get(slug=slug)
         feed_url = request.values.get('feed_url', None)
         adventure.delorme = Delorme(
-            feeed_url=feed_url
+            feed_url=feed_url
         )
         adventure.save()
 
-        return Response(json.dumps({'status': 'ok'}), status=200, mimetype='application/json')
+        return jsonify({'delorme': adventure.delorme.to_dict()})
     except TypeError as err:
         logging.error(err)
         abort(400)
@@ -111,14 +117,39 @@ def add_delorme(slug):
     return
 
 
+@MOD_DELORME.route('/', methods=['GET'])
+@crossdomain(origin='*')
+@OAUTH.require_oauth('email')
+def get_delorme(slug):
+    """Get Delorme inReach information."""
+    try:
+        adventure = Adventure.objects.get(slug=slug)
+        if adventure.delorme:
+            return jsonify({'delorme': adventure.delorme.to_dict()})
+        return jsonify({'error': 'DeLorme inReach information is not set.'}), 400
+    except TypeError as err:
+        logging.error(err)
+        abort(400)
+    except BadRequest:
+        abort(400)
+    return
+
+
+@MOD_DELORME.route('/', methods=['DELETE'])
+@crossdomain(origin='*')
+@OAUTH.require_oauth('email')
+def delete_point(slug):
+    """Delete DeLorme inReach information."""
+    Adventure.objects(slug=slug).update(unset__delorme=1, upsert=True)
+    return jsonify({'status': 'ok'})
+
+
 @MOD_DELORME.route('/load', methods=['GET'])
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def load_tracker(slug):
     """Load DeLorme inReach tracker points from configured feed URL."""
-    adventure = Adventure.objects().get(slug=slug)
+    adventure = Adventure.objects(slug=slug).get()
     delorme = adventure.delorme
     if delorme.feed_url is not None:
         return load_data(delorme.feed_url, adventure)
-    return Response(json.dumps( \
-        {'error': 'DeLorme inReach Feed URL not found.'} \
-    ), status=500, mimetype='application/json')
+    return jsonify({'error': 'DeLorme inReach information is not set.'}), 400

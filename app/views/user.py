@@ -8,8 +8,8 @@ import logging
 from flask import Blueprint, request, jsonify, abort
 from mongoengine import NotUniqueError, DoesNotExist
 from werkzeug.security import gen_salt
-from app.mod_auth.controllers import oauth
-from app.mod_auth.models import Client
+from app.views.auth import OAUTH
+from app.models.auth import Client
 from app.models.user import User
 from app.models.adventure import Adventure
 from app.decorators import crossdomain
@@ -18,7 +18,7 @@ MOD_USER = Blueprint('user', __name__, url_prefix='/api/v1/user')
 
 
 @MOD_USER.route('/', methods=['GET'])
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def get_current_user():
     """Get current user."""
     user = request.oauth.user
@@ -60,7 +60,7 @@ def add_user():
 
 @MOD_USER.route('/adventure', methods=['GET'])
 @crossdomain(origin='*')
-@oauth.require_oauth('email')
+@OAUTH.require_oauth('email')
 def list_user_adventures():
     """Return user Adventures."""
     user = request.oauth.user
