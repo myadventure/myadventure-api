@@ -54,6 +54,7 @@ def add_adventure():
             name=name,
             users=[user],
             delorme=None,
+            adafruit=None,
             points=[]
         )
         adventure.save()
