@@ -126,7 +126,7 @@ def get_delorme(slug):
         adventure = Adventure.objects.get(slug=slug)
         if adventure.delorme:
             return jsonify({'delorme': adventure.delorme.to_dict()})
-        return jsonify({'error': 'DeLorme inReach information is not set.'}), 400
+        return jsonify({'error': 'DeLorme inReach information is not configured.'}), 400
     except TypeError as err:
         logging.error(err)
         abort(400)
