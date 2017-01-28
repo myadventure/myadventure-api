@@ -53,7 +53,7 @@ def load_data(base_url, username, feed, aio_key, adventure):
                 ).first()
         if point is None:
             point = Point(
-                title='MQTT tracker information received.',
+                title='Adafruit.io tracker information received.',
                 desc=None,
                 elevation=altitude,
                 speed=speed,
