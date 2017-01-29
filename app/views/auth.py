@@ -55,11 +55,13 @@ def load_user_from_request(request):
     # first, try to login using the api_key url arg
     api_key = request.args.get('api_key')
     if api_key:
+        api_key = api_key.encode('ascii')
         return validate_api_key(api_key)
 
     # next, try to login using Basic Auth
     api_key = request.headers.get('Authorization')
     if api_key:
+        api_key = api_key.encode('ascii')
         api_key = api_key.replace('Basic ', '', 1)
         return validate_api_key(api_key)
 
