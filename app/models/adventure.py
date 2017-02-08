@@ -23,6 +23,7 @@ class Adventure(Document):
     """
     slug = fields.StringField(primary_key=True)
     name = fields.StringField()
+    description = fields.StringField()
     users = fields.ListField(fields.ReferenceField(User))
     delorme = fields.EmbeddedDocumentField(Delorme)
     adafruit = fields.EmbeddedDocumentField(Adafruit)
