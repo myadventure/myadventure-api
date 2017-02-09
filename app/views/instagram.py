@@ -32,8 +32,8 @@ def get_media(api, media=None, max_id=None):
     for media_item in response:
         media.append(media_item)
 
-    # pagination is not working as expected.
-    # the client is expecting a next_url parameter in the pagination object,
+    # TODO: Pagination is not working as expected.
+    # The client is expecting a next_url parameter in the pagination object,
     # but even with more pictures to load, nothing is being returned.
     if next_url is not None:
         parsednext = urlparse.urlparse(next)
