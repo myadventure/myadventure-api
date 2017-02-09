@@ -48,10 +48,12 @@ def add_adventure():
     """Add Adventure."""
     try:
         name = request.values.get('name', None)
+        description = request.values.get('description', None)
         user = request.oauth.user
         adventure = Adventure(
             slug=slugify(name),
             name=name,
+            description=description,
             users=[user],
             delorme=None,
             adafruit=None,
