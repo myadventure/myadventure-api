@@ -45,8 +45,6 @@ def load_data(base_url, username, feed, aio_key, adventure):
         altitude = str(location[u'geometry'][u'coordinates'][2])
         speed = str(point[u'value'])
 
-
-
         if aio_id is not None:
             point = adventure.points.filter( \
                     point_type='tracker', aio_id=aio_id \
@@ -115,7 +113,7 @@ def get_adafruit(slug):
         adventure = Adventure.objects.get(slug=slug)
         if adventure.adafruit:
             return jsonify({'adafruit': adventure.adafruit.to_dict()})
-        return jsonify({'error': 'Adafruit.io information is configured.'}), 400
+        return jsonify({'error': 'Adafruit.io is not configured for this adventure.'}), 400
     except TypeError as err:
         logging.error(err)
         abort(400)
@@ -135,4 +133,4 @@ def load_tracker(slug):
         return load_data( \
             adafruit.base_url, adafruit.username, adafruit.feed, adafruit.aio_key, adventure \
         )
-    return jsonify({'error': 'Adafruit.io configuration not found.'}), 500
+    return jsonify({'error': 'Adafruit.io is not configured for this adventure.'}), 500
