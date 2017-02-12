@@ -8,6 +8,7 @@ from mongoengine import fields
 from .user import User
 from .delorme import Delorme
 from .adafruit import Adafruit
+from .instagram import Instagram
 from .point import Point
 
 
@@ -27,6 +28,7 @@ class Adventure(Document):
     users = fields.ListField(fields.ReferenceField(User))
     delorme = fields.EmbeddedDocumentField(Delorme)
     adafruit = fields.EmbeddedDocumentField(Adafruit)
+    instagram = fields.EmbeddedDocumentField(Instagram)
     points = fields.EmbeddedDocumentListField(Point)
 
 
