@@ -37,7 +37,7 @@ def add_point(slug):
         point = Point(
             title='Android tracker information received.',
             desc=request.args.get('desc', None),
-            elevation=request.args.get('alt', None),
+            altitude=request.args.get('alt', None),
             speed=request.args.get('spd', None),
             direction=request.args.get('dir', None),
             latitude=SFLOAT(request.args.get('lat', None)),
@@ -51,6 +51,9 @@ def add_point(slug):
             thumb=None,
             photo=None,
             video=None,
+            source='android',
+            battery=SFLOAT(request.args.get('bat', None)),
+            user=request.oauth.user
         )
         adventure.points.append(point)
         adventure.save()

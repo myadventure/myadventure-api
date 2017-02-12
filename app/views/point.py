@@ -62,7 +62,7 @@ def update_point(slug, point_type, point_id):
         update = {
             'set__points__S__title': request.values.get('title', None),
             'set__points__S__desc': request.values.get('desc', None),
-            'set__points__S__elevation': request.values.get('elevation', None),
+            'set__points__S__altitude': request.values.get('altitude', None),
             'set__points__S__speed': request.values.get('speed', None),
             'set__points__S__direction': request.values.get('direction', None),
             'set__points__S__latitude': SFLOAT(request.values.get('latitude', None)),
@@ -75,7 +75,9 @@ def update_point(slug, point_type, point_id):
             'set__points__S__hide': SBOOL(request.values.get('hide', None)),
             'set__points__S__thumb': request.values.get('thumb', None),
             'set__points__S__photo': request.values.get('photo', None),
-            'set__points__S__video': request.values.get('video', None)
+            'set__points__S__video': request.values.get('video', None),
+            'set__points__S__battery': SFLOAT(request.values.get('battery', None)),
+            'set__points__S__source': request.values.get('source', None)
         }
 
         updated_items = Adventure.objects(
@@ -112,7 +114,7 @@ def add_point(slug, point_type):
         point = Point(
             title=request.values.get('title', None),
             desc=request.values.get('desc', None),
-            elevation=request.values.get('elevation', None),
+            altitude=request.values.get('altitude', None),
             speed=request.values.get('speed', None),
             direction=request.values.get('direction', None),
             latitude=SFLOAT(request.values.get('latitude', None)),
@@ -126,6 +128,9 @@ def add_point(slug, point_type):
             thumb=request.values.get('thumb', None),
             photo=request.values.get('photo', None),
             video=request.values.get('video', None),
+            source=request.values.get('source', None),
+            battery=SFLOAT(request.values.get('battery', None)),
+            user=request.oauth.user
         )
         adventure.points.append(point)
         adventure.save()

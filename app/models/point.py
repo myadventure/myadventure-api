@@ -5,6 +5,7 @@ Point model
 
 from mongoengine import EmbeddedDocument
 from mongoengine import fields
+from .user import User
 
 class Point(EmbeddedDocument):
     """A point.
@@ -13,7 +14,7 @@ class Point(EmbeddedDocument):
     point_id = fields.SequenceField()
     title = fields.StringField()
     desc = fields.StringField()
-    elevation = fields.StringField()
+    altitude = fields.StringField()
     speed = fields.StringField()
     direction = fields.StringField()
     latitude = fields.FloatField()
@@ -27,6 +28,10 @@ class Point(EmbeddedDocument):
     thumb = fields.StringField()
     photo = fields.StringField()
     video = fields.StringField()
+    source = fields.StringField()
+    battery = fields.FloatField()
+    user = fields.ReferenceField(User)
+    elevation = fields.StringField() # TODO: depracated field
 
     def to_dict(self):
         """Convert object to dict."""

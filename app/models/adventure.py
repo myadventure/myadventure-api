@@ -5,7 +5,7 @@ Adventure model
 
 from mongoengine import Document
 from mongoengine import fields
-from app.models.user import User
+from .user import User
 from .delorme import Delorme
 from .adafruit import Adafruit
 from .point import Point

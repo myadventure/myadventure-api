@@ -28,7 +28,7 @@ def load_data(feed_url, adventure):
             extended_data = placemark.ExtendedData.Data
             delorme_id = None
             event = None
-            elevation = None
+            altitude = None
             velocity = None
             course = None
             text = None
@@ -40,7 +40,7 @@ def load_data(feed_url, adventure):
                 elif data.attrib['name'] == 'Event':
                     event = data.value.text.encode('utf-8')
                 elif data.attrib['name'] == 'Elevation':
-                    elevation = data.value.text.encode('utf-8')
+                    altitude = data.value.text.encode('utf-8')
                 elif data.attrib['name'] == 'Velocity':
                     velocity = data.value.text.encode('utf-8')
                 elif data.attrib['name'] == 'Course':
@@ -69,7 +69,7 @@ def load_data(feed_url, adventure):
                 point = Point(
                     title=title,
                     desc=desc,
-                    elevation=elevation,
+                    altitude=altitude,
                     speed=velocity,
                     direction=course,
                     latitude=latitude,
@@ -82,7 +82,10 @@ def load_data(feed_url, adventure):
                     hide=False,
                     thumb=None,
                     photo=None,
-                    video=None
+                    video=None,
+                    battery=None,
+                    source='delorme',
+                    user=None
                 )
 
                 adventure.points.append(point)

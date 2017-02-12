@@ -55,7 +55,7 @@ def load_data(base_url, username, feed, aio_key, adventure):
             point = Point(
                 title='Adafruit.io tracker information received.',
                 desc=None,
-                elevation=altitude,
+                altitude=altitude,
                 speed=speed,
                 direction=None,
                 latitude=latitude,
@@ -68,7 +68,10 @@ def load_data(base_url, username, feed, aio_key, adventure):
                 hide=False,
                 thumb=None,
                 photo=None,
-                video=None
+                video=None,
+                source="adafruit",
+                battery=None,
+                user=None
             )
 
             adventure.points.append(point)
