@@ -43,7 +43,10 @@ def load_data(base_url, username, feed, aio_key, adventure):
         longitude = float(location[u'geometry'][u'coordinates'][0])
         latitude = float(location[u'geometry'][u'coordinates'][1])
         altitude = str(location[u'geometry'][u'coordinates'][2])
-        speed = str(point[u'value'])
+        value = str(point[u'value'])
+        value_arr = value.split(':')
+        speed = value_arr[0]
+        battery = value_arr[1]
 
         if aio_id is not None:
             point = adventure.points.filter( \
@@ -68,7 +71,7 @@ def load_data(base_url, username, feed, aio_key, adventure):
                 photo=None,
                 video=None,
                 source="adafruit",
-                battery=None,
+                battery=battery,
                 user=None
             )
 
