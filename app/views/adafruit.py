@@ -116,15 +116,6 @@ def load_data(base_url, username, feed, aio_key, adventure, start_time=None):
                 logging.warning(point)
         adventure.save()
 
-        start_time = None
-        last_point = get_last_point(adventure)
-        if last_point is not None:
-            start_time = last_point.timestamp
-
-        return load_data( \
-            base_url, username, feed, aio_key, adventure, start_time \
-        )
-
     return jsonify({'status': 'ok'})
 
 
