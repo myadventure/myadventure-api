@@ -35,6 +35,8 @@ def get_media(api, media=None, max_id=None):
     # TODO: Pagination is not working as expected.
     # The client is expecting a next_url parameter in the pagination object,
     # but even with more pictures to load, nothing is being returned.
+    # min_id is also not working since Apr 2016
+    # so it's impossible to only pull new media
     if next_url is not None:
         parsednext = urlparse.urlparse(next)
         max_id = urlparse.parse_qs(parsednext.query)['max_id'][0]
