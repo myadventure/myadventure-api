@@ -7,8 +7,9 @@ Adafruit.io views
 
 import logging
 import json
+import urllib
 import urllib2
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, abort, request, jsonify
 from werkzeug.exceptions import BadRequest
 from app.decorators import crossdomain
@@ -22,13 +23,46 @@ AIO_URL = 'https://io.adafruit.com'
 MOD_ADAFRUIT = Blueprint('adafruit', __name__, url_prefix='/api/v1/adventure/<slug>/adafruit')
 
 
-def load_data(base_url, username, feed, aio_key, adventure):
+def get_last_point(adventure):
+    """Returns the last adafruit point for the adventure."""
+    points = adventure.points.filter( \
+        source='adafruit' \
+    )
+
+    point = None
+
+    for doc in points:
+        if point is None or doc.timestamp > point.timestamp:
+            point = doc
+
+    return point
+
+def load_data(base_url, username, feed, aio_key, adventure, start_time=None):
     """Load Adafruit.io data."""
+
     request_headers = {
         "X-AIO-Key": aio_key
     }
 
-    req = urllib2.Request(AIO_URL + base_url + '/' + username + '/feeds/' + feed + '/data', \
+    if start_time is None:
+        last_point = get_last_point(adventure)
+        if last_point is not None:
+            start_time = last_point.timestamp
+        else:
+            start_time = datetime(2017, 1, 1)
+
+    request_params = {}
+
+    if start_time is not None:
+        delta = timedelta(seconds=60)
+        request_params['start_time'] = datetime.strftime( \
+            start_time + delta, \
+            '%Y-%m-%dT%H:%M:%SZ' \
+        )
+
+    req = urllib2.Request( \
+        AIO_URL + base_url + '/' + username + '/feeds/' + feed + '/data' + \
+        '?' + urllib.urlencode(request_params), \
         headers=request_headers \
     )
 
@@ -36,47 +70,51 @@ def load_data(base_url, username, feed, aio_key, adventure):
 
     data = json.load(res)
 
-    for point in data:
-        aio_id = point[u'id']
-        timestamp = datetime.strptime(point[u'created_at'], "%Y-%m-%dT%H:%M:%S.%fZ")
-        location = point[u'location']
-        longitude = float(location[u'geometry'][u'coordinates'][0])
-        latitude = float(location[u'geometry'][u'coordinates'][1])
-        altitude = str(location[u'geometry'][u'coordinates'][2])
-        value = str(point[u'value'])
-        value_arr = value.split(':')
-        speed = value_arr[0]
-        battery = value_arr[1]
+    if len(data) > 0:
+        for point in data:
+            try:
+                aio_id = point[u'id']
+                timestamp = datetime.strptime(point[u'created_at'], '%Y-%m-%dT%H:%M:%SZ')
+                longitude = float(point[u'lat'])
+                latitude = float(point[u'lon'])
+                altitude = str(point[u'ele'])
+                value = str(point[u'value'])
+                value_arr = value.split(':')
+                speed = value_arr[0]
+                battery = value_arr[1]
 
-        if aio_id is not None:
-            point = adventure.points.filter( \
-                    point_type='tracker', aio_id=aio_id \
-                ).first()
-        if point is None:
-            point = Point(
-                title='Adafruit.io tracker information received.',
-                desc=None,
-                altitude=altitude,
-                speed=speed,
-                direction=None,
-                latitude=latitude,
-                longitude=longitude,
-                resource=None,
-                point_type='tracker',
-                timestamp=timestamp,
-                delorme_id=None,
-                aio_id=aio_id,
-                hide=False,
-                thumb=None,
-                photo=None,
-                video=None,
-                source="adafruit",
-                battery=battery,
-                user=None
-            )
+                if aio_id is not None:
+                    point = adventure.points.filter( \
+                        point_type='tracker', aio_id=aio_id \
+                    ).first()
+                if point is None:
+                    point = Point(
+                        title='Adafruit.io tracker information received.',
+                        desc=None,
+                        altitude=altitude,
+                        speed=speed,
+                        direction=None,
+                        latitude=latitude,
+                        longitude=longitude,
+                        resource=None,
+                        point_type='tracker',
+                        timestamp=timestamp,
+                        delorme_id=None,
+                        aio_id=aio_id,
+                        hide=False,
+                        thumb=None,
+                        photo=None,
+                        video=None,
+                        source="adafruit",
+                        battery=battery,
+                        user=None
+                    )
 
-            adventure.points.append(point)
-            adventure.save()
+                    adventure.points.append(point)
+            except (ValueError, TypeError) as err:
+                logging.warning(err)
+                logging.warning(point)
+        adventure.save()
 
     return jsonify({'status': 'ok'})
 
