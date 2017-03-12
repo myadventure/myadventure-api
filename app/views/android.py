@@ -47,7 +47,7 @@ def add_point(slug):
             timestamp=timestamp,
             delorme_id=None,
             aio_id=None,
-            hide=SBOOL(request.args.get('hide', None)),
+            hide=bool(request.args.get('hide', None) in ['true', 'True', 'TRUE', '1', 'y', 'yes']),
             thumb=None,
             photo=None,
             video=None,
