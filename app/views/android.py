@@ -8,7 +8,7 @@ Android views.
 import logging
 from datetime import datetime
 from flask import Blueprint, abort, request, jsonify
-from flask_login import login_required
+from flask_login import login_required, current_user
 from werkzeug.exceptions import BadRequest
 from app.decorators import crossdomain, ignore_exception
 from app.models.adventure import Adventure
@@ -53,7 +53,7 @@ def add_point(slug):
             video=None,
             source='android',
             battery=SFLOAT(request.args.get('bat', None)),
-            user=request.oauth.user
+            user=current_user
         )
         adventure.points.append(point)
         adventure.save()
