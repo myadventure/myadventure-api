@@ -28,7 +28,7 @@ def add_point(slug):
         timestamp = datetime.now()
         adventure = Adventure.objects(slug=slug).get()
         point = Point(
-            title='Arduino tracker information received.',
+            title='Arduino tracker',
             desc=None,
             altitude=request.form.get('alt', None),
             speed=request.form.get('spd', None),
