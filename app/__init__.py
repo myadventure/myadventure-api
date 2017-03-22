@@ -15,6 +15,7 @@ from .views.point import MOD_POINT
 from .views.adafruit import MOD_ADAFRUIT
 from .views.android import MOD_ANDROID
 from .views.instagram import MOD_INSTAGRAM
+from .views.arduino import MOD_ARDUINO
 
 APP = Flask(__name__, static_folder=os.getcwd() \
     + '/app/static', static_url_path='', template_folder=os.getcwd() \
@@ -60,3 +61,4 @@ APP.register_blueprint(MOD_POINT)
 APP.register_blueprint(MOD_ADAFRUIT)
 APP.register_blueprint(MOD_ANDROID)
 APP.register_blueprint(MOD_INSTAGRAM)
+APP.register_blueprint(MOD_ARDUINO)
