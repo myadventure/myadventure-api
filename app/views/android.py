@@ -57,11 +57,11 @@ def add_point(slug):
         )
         adventure.points.append(point)
         adventure.save()
-        return jsonify(point.to_dict())
+        return jsonify({'status': "ok"})
     except ValueError as err:
         logging.error(err)
         abort(400)
     except BadRequest as err:
         logging.error(err)
         abort(400)
-    return
+    return jsonify({'status': "ok"})
