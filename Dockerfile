@@ -29,15 +29,18 @@ RUN /opt/venv/bin/pip install -r /opt/venv/requirements.txt
 # install gunicorn
 RUN /opt/venv/bin/pip install gunicorn
 
-# expose port(s)
-EXPOSE 5000
-
 # install supervisor-stdout
 RUN pip install supervisor-stdout
 
 # file management, everything after an ADD is uncached, so we do it as late as
 # possible in the process.
 ADD supervisord.conf /etc/supervisord.conf
+
+# Bundle app source
+COPY app /opt/app
+
+# expose port(s)
+EXPOSE 5000
 
 # start supervisor to run our wsgi server
 CMD supervisord -c /etc/supervisord.conf -n
