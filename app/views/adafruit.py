@@ -7,8 +7,8 @@ Adafruit.io views
 
 import logging
 import json
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 from datetime import datetime, timedelta
 from flask import Blueprint, abort, request, jsonify
 from werkzeug.exceptions import BadRequest
@@ -60,25 +60,25 @@ def load_data(base_url, username, feed, aio_key, adventure, start_time=None):
             '%Y-%m-%dT%H:%M:%SZ' \
         )
 
-    req = urllib2.Request( \
+    req = urllib.request.Request( \
         AIO_URL + base_url + '/' + username + '/feeds/' + feed + '/data' + \
-        '?' + urllib.urlencode(request_params), \
+        '?' + urllib.parse.urlencode(request_params), \
         headers=request_headers \
     )
 
-    res = urllib2.urlopen(req)
+    res = urllib.request.urlopen(req)
 
     data = json.load(res)
 
     if len(data) > 0:
         for point in data:
             try:
-                aio_id = point[u'id']
-                timestamp = datetime.strptime(point[u'created_at'], '%Y-%m-%dT%H:%M:%SZ')
-                longitude = float(point[u'lat'])
-                latitude = float(point[u'lon'])
-                altitude = str(point[u'ele'])
-                value = str(point[u'value'])
+                aio_id = point['id']
+                timestamp = datetime.strptime(point['created_at'], '%Y-%m-%dT%H:%M:%SZ')
+                longitude = float(point['lat'])
+                latitude = float(point['lon'])
+                altitude = str(point['ele'])
+                value = str(point['value'])
                 value_arr = value.split(':')
                 speed = value_arr[0]
                 battery = value_arr[1]

@@ -4,7 +4,7 @@ Initialize adventure delorme controller
 """
 
 import logging
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import datetime
 from pykml import parser
 from flask import Blueprint, abort, request, jsonify
@@ -20,7 +20,7 @@ MOD_DELORME = Blueprint('delorme', __name__, url_prefix='/api/v1/adventure/<slug
 
 def load_data(feed_url, adventure):
     """Load DeLorme inReach data from specified feed URL."""
-    obj = urllib2.urlopen(feed_url)
+    obj = urllib.request.urlopen(feed_url)
     root = parser.parse(obj).getroot()
     for placemark in root.Document.Folder.Placemark:
         try:

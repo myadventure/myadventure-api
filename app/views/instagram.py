@@ -5,10 +5,10 @@ Instagram views
 
 """
 
-from __future__ import absolute_import
+
 
 import logging
-import urlparse
+import urllib.parse
 from instagram.client import InstagramAPI
 from flask import Blueprint, abort, request, jsonify
 from werkzeug.exceptions import BadRequest
@@ -38,8 +38,8 @@ def get_media(api, media=None, max_id=None):
     # min_id is also not working since Apr 2016
     # so it's impossible to only pull new media
     if next_url is not None:
-        parsednext = urlparse.urlparse(next)
-        max_id = urlparse.parse_qs(parsednext.query)['max_id'][0]
+        parsednext = urllib.parse.urlparse(next)
+        max_id = urllib.parse.parse_qs(parsednext.query)['max_id'][0]
         media = get_media(api, media, max_id)
 
     return media

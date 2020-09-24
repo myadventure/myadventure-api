@@ -3,7 +3,7 @@ auth.py
 
 Auth module controllers.
 """
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import base64
 from flask import Blueprint, request, render_template, abort, redirect, url_for, jsonify
 from flask_login import current_user, login_user, LoginManager, login_required, logout_user
@@ -85,9 +85,9 @@ def login():
                 next = request.args.get('next')
 
                 if next:
-                    params = dict((key, request.args.get(key)) for key in request.args.keys())
+                    params = dict((key, request.args.get(key)) for key in list(request.args.keys()))
                     del params['next']
-                    next = next + '?' + urllib.urlencode(params)
+                    next = next + '?' + urllib.parse.urlencode(params)
 
                 if not next_is_valid(next):
                     return abort(401)

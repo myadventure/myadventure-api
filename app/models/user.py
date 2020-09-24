@@ -50,6 +50,6 @@ class User(Document):
     def get_id(self):
         """Get user id."""
         try:
-            return unicode(self.id)
+            return str(self.id)
         except AttributeError:
             raise NotImplementedError('No `id` attribute - override `get_id`')

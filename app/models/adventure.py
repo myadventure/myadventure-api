@@ -35,9 +35,9 @@ class Adventure(Document):
     def to_dict(self):
         """Convert object to dict."""
         result = self.to_mongo().to_dict()
-        if 'points' in result.keys():
+        if 'points' in list(result.keys()):
             del result['points']
-        if 'delorme' in result.keys():
+        if 'delorme' in list(result.keys()):
             del result['delorme']
 
         return result
